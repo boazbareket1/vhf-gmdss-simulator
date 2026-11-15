@@ -427,6 +427,25 @@ OVER</div>
   </details>
 
   <details>
+    <summary>NAVTEX: איך קוראים את קוד ההודעה</summary>
+    <p>כל הודעה נפתחת ב-ZCZC ובקוד של ארבעה תווים, למשל PA18, ומסתיימת ב-NNNN.</p>
+    <table class="gt">
+      <tr><td>P</td><td>התו הראשון: תחנת השידור. P היא תחנת חיפה.</td></tr>
+      <tr><td>A</td><td>התו השני: נושא ההודעה.</td></tr>
+      <tr><td>18</td><td>שני התווים האחרונים: מספר סידורי. 00 שמור להודעות חירום, שמוצגות תמיד.</td></tr>
+    </table>
+    <h3>נושאי ההודעות</h3>
+    <table class="gt">
+      <tr><td>A</td><td>אזהרות ניווט. אי אפשר לסנן.</td></tr>
+      <tr><td>B</td><td>אזהרות מטאורולוגיות, למשל אזהרת סערה. אי אפשר לסנן.</td></tr>
+      <tr><td>D</td><td>חיפוש והצלה. אי אפשר לסנן.</td></tr>
+      <tr><td>E</td><td>תחזית מזג אוויר שגרתית.</td></tr>
+      <tr><td>Z</td><td>אין הודעות לשידור.</td></tr>
+    </table>
+    <p>התדרים: 518 kHz באנגלית, ו-490 kHz בשפה המקומית. המקלט זוכר כל הודעה שנקלטה כראוי, ואינו מציג אותה שוב.</p>
+  </details>
+
+  <details>
     <summary>אלפבית פונטי, מספרים ומיקום</summary>
     <div class="tpl">A Alfa     B Bravo    C Charlie  D Delta
 E Echo     F Foxtrot  G Golf     H Hotel
@@ -546,8 +565,8 @@ Y Yankee   Z Zulu</div>
 <!-- question bank topics -->
 <div class="modal" id="topics" hidden>
   <div class="sheet">
-    <h2>מאגר שאלות עיוניות</h2>
-    <p>בחר נושא, או תרגל 10 שאלות אקראיות מכל הנושאים.</p>
+    <h2 id="tp-ttl"></h2>
+    <p id="tp-sub"></p>
     <div class="quiz" id="tp-list"></div>
     <div class="row"><button class="btn sec" id="tp-close">סגור</button></div>
   </div>
@@ -931,7 +950,7 @@ function drawComposer(){
     b.onclick=()=>{
       if(!ch.decoy&&ch.t===C.lines[C.i]){ch.used=true;C.i++;C.msg='';tone(1200,.04,.04,'sine');drawComposer();}
       else{
-        C.msg=ch.why||'זה לא החלק הבא בהודעה. חשוב מה אומרים בשלב הזה.';
+        C.msg=ch.why||C.v.miss||'זה לא החלק הבא בהודעה. חשוב מה אומרים בשלב הזה.';
         mistake(null);b.classList.add('bad');$('cp-msg').textContent=C.msg;
         setTimeout(()=>b.classList.remove('bad'),350);
       }
@@ -1346,19 +1365,69 @@ const BANK=[
  ['reg','לפי איזה שעון נרשמות ומשודרות הודעות ב-GMDSS?',['UTC, זמן אוניברסלי מתואם','השעון המקומי של נמל היציאה','שעון הקיץ של המדינה הקרובה','השעון של תחנת החוף הקרובה'],'שעון אחד לכולם מונע בלבול בין אזורי זמן בתיאום חיפוש והצלה.'],
  ['reg','מה קובעת חובת סודיות האלחוט?',['אסור לפרסם, למסור או לנצל מידע שנקלט במקרה משיחה שאינה מיועדת לציבור','מותר להקליט ולפרסם כל שיחה שנקלטת ב-VHF','סודיות האלחוט חלה רק על כלי שיט צבאיים','מותר להעביר מידע מסחרי שנקלט לכל גורם'],'החובה אינה חלה על הודעות מצוקה, דחיפות ובטיחות, ועל הודעות שמיועדות לכלל הציבור.']
 ];
+const mkQ=q=>({t:q[1],exp:q[3],quiz:shuffle(q[2].map((t,i)=>({t,ok:i===0,why:i===0?'השאלה הקודמת: תשובה נכונה. '+q[3]:'לא נכון. חשוב שוב ובחר תשובה אחרת.'})))});
+function wrongTips(steps){const w=steps.filter(s=>s.wrong).map(s=>s.t+' — '+s.exp);return w.length?w:['ענית נכון על כל השאלות בניסיון הראשון.'];}
 function bankDef(topic){
   let qs=shuffle(BANK.filter(q=>!topic||q[0]===topic));
   if(!topic)qs=qs.slice(0,10);
-  const steps=qs.map(q=>({t:q[1],exp:q[3],quiz:shuffle(q[2].map((t,i)=>({t,ok:i===0,why:i===0?'השאלה הקודמת: תשובה נכונה. '+q[3]:'לא נכון. חשוב שוב ובחר תשובה אחרת.'})))}));
+  const steps=qs.map(mkQ);
   return {id:'bank',paper:true,title:topic?TOPICS[topic]:'10 שאלות אקראיות',sit:'שאלות עיוניות מהמאגר. אחרי כל תשובה נכונה מוצג הסבר.',steps,again:()=>bankDef(topic),
-    dynTips:()=>{const w=steps.filter(s=>s.wrong).map(s=>s.t+' — '+s.exp);return w.length?w:['ענית נכון על כל השאלות בניסיון הראשון.'];}};
+    dynTips:()=>wrongTips(steps)};
+}
+function openMenu(ttl,sub,items){
+  $('tp-ttl').textContent=ttl;$('tp-sub').textContent=sub;
+  const l=$('tp-list');l.innerHTML='';
+  items.forEach(([txt,mk])=>{const b=document.createElement('button');b.textContent=txt;b.onclick=()=>{$('topics').hidden=true;startScenario(mk());};l.appendChild(b);});
+  $('topics').hidden=false;
 }
 function openTopics(){
-  const l=$('tp-list');l.innerHTML='';
-  const add=(txt,key)=>{const b=document.createElement('button');b.textContent=txt;b.onclick=()=>{$('topics').hidden=true;startScenario(bankDef(key));};l.appendChild(b);};
-  add('10 שאלות אקראיות מכל הנושאים',null);
-  Object.keys(TOPICS).forEach(k=>add(`${TOPICS[k]} (${BANK.filter(q=>q[0]===k).length})`,k));
-  $('topics').hidden=false;
+  openMenu('מאגר שאלות עיוניות','בחר נושא, או תרגל 10 שאלות אקראיות מכל הנושאים.',
+    [['10 שאלות אקראיות מכל הנושאים',()=>bankDef(null)]].concat(Object.keys(TOPICS).map(k=>[`${TOPICS[k]} (${BANK.filter(q=>q[0]===k).length})`,()=>bankDef(k)])));
+}
+
+/* ----- quick drills: phonetic spelling, NAVTEX codes, MMSI types ----- */
+const ALPHA={A:'Alfa',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Golf',H:'Hotel',I:'India',J:'Juliett',K:'Kilo',L:'Lima',M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',Y:'Yankee',Z:'Zulu'};
+const PHON=[['TAMAR','שם כלי שיט'],['GALIT','שם כלי שיט'],['HAIFA','שם מקום'],['MAYDAY','מילת נוהל'],['WINDWARD','שם כלי שיט'],['PHOENIX','שם כלי שיט'],['JACKPOT','שם כלי שיט'],['VIKING','שם כלי שיט'],['QUARTZ','שם כלי שיט'],['SABABA','שם כלי שיט'],['4XTM','אות קריאה'],['4Z2045','אות קריאה']];
+const FAKE=['Apple','George','Mary','Nancy','Peter','Roger','Sugar','Zebra'];
+const spell=w=>w.split('').map(c=>/\d/.test(c)?DIG[+c][0]+DIG[+c].slice(1).toLowerCase():ALPHA[c]);
+function phonDef(){
+  const steps=shuffle(PHON.slice()).slice(0,6).map(([w,kind],i)=>{
+    const lines=spell(w),used=new Set(lines),fake=shuffle(FAKE.slice())[0];
+    const decoys=shuffle(Object.values(ALPHA).filter(x=>!used.has(x))).slice(0,3).map(t=>({t}))
+      .concat([{t:fake,why:`${fake} אינה מילה באלפבית הפונטי הבינלאומי.`}]);
+    return {t:`איית באלפבית הפונטי: ${w}`,h:`${kind}. הקש על המילים לפי סדר האותיות. ספרות נאמרות כמילים באנגלית, אחת-אחת.`,
+      write:{id:'ph'+i,title:`איות: ${w}`,miss:'זו לא האות הבאה. בדוק את האיות.',lines,decoys},done:wdone('ph'+i)};
+  });
+  return {id:'drill',paper:true,title:'איות פונטי',sit:'איות שמות ואותיות קריאה באלפבית הפונטי הבינלאומי, כפי שמאייתים בקשר.',steps,again:phonDef,
+    tips:['Alfa נכתבת ב-f, ו-Juliett בשתי t.','ספרות נאמרות כמילים באנגלית, אחת-אחת: 4X הוא Four, X-ray.','אותיות הקריאה של כלי שיט ישראליים מתחילות ב-4X או ב-4Z.','לפני האיות אומרים I SPELL.']};
+}
+const NAVQ=[
+ ['','פענח את קוד ההודעה ZCZC PA18.',['תחנת חיפה, אזהרת ניווט, הודעה מספר 18','תחנת חיפה, תחזית מזג אוויר, השעה 18:00','תחנת חיפה, אזהרה מטאורולוגית, הודעה מספר 18','תחנת חיפה, חיפוש והצלה, הודעה מספר 18'],'P היא תחנת חיפה, A הוא אזהרות ניווט, ו-18 הוא המספר הסידורי.'],
+ ['','למה ההודעה ZCZC PD00 מוצגת תמיד, ומפעילה התראה במקלט?',['הנושא D הוא חיפוש והצלה, והמספר 00 שמור להודעות חירום','זו הודעת בדיקה יומית של התחנה','המספר 00 מציין שההודעה בוטלה','האות D מציינת הודעה שמיועדת לדייגים'],'D הוא חיפוש והצלה. המספר הסידורי 00 שמור להודעות הדחופות ביותר, והמקלט אינו מסנן אותן.'],
+ ['','פענח את קוד ההודעה ZCZC PB07.',['תחנת חיפה, אזהרה מטאורולוגית, הודעה מספר 07','תחנת חיפה, תחזית מזג אוויר, הודעה מספר 07','תחנת חיפה, אזהרת ניווט, הודעה מספר 07','תחנת חיפה, דיווח קרח, הודעה מספר 07'],'B הוא אזהרות מטאורולוגיות, למשל אזהרת סערה. תחזית רגילה מסומנת ב-E.'],
+ ['','איזה מידע יש בהודעה ZCZC PE42?',['תחזית מזג אוויר שגרתית','אזהרת סערה דחופה','הודעת חיפוש והצלה','אזהרה על עזר ניווט כבוי'],'E הוא תחזית מזג אוויר. אזהרה מטאורולוגית מסומנת ב-B.'],
+ ['','קלטת מתחנת חיפה הודעה שהתו השני בקוד שלה הוא Z. מה המשמעות?',['לתחנה אין כרגע הודעות לשידור','יש תקלה במשדר של התחנה','יש מצוקה חמורה מול חופי חיפה','נמל חיפה נסגר לכלי שיט'],'Z פירושו שאין הודעות לשידור. ההודעה גם מאשרת שהמקלט שלך קולט את התחנה.'],
+ ['','אילו סוגי הודעות אי אפשר לסנן במקלט NAVTEX?',['אזהרות ניווט (A), אזהרות מטאורולוגיות (B) וחיפוש והצלה (D)','תחזיות מזג אוויר (E) בלבד','אפשר לסנן כל סוג הודעה','הודעות Z בלבד'],'הודעות A, B ו-D נוגעות ישירות לבטיחות, ולכן המקלט מציג אותן תמיד.'],
+ ['','הודעת NAVTEX נפתחת ב-ZCZC. במה היא מסתיימת?',['NNNN','OVER','ZZZZ','OUT'],'כל הודעה נפתחת ב-ZCZC ובקוד של ארבעה תווים, ומסתיימת ב-NNNN.']
+];
+const MMSIQ=[
+ ['','למי שייך ה-MMSI ‏428104592?',['כלי שיט ישראלי','תחנת חוף ישראלית','קבוצת כלי שיט ישראליים','משואת AIS-SART'],'9 ספרות שמתחילות ישר בקוד המדינה 428: כלי שיט ישראלי.'],
+ ['','למי שייך ה-MMSI ‏004280001?',['תחנת חוף ישראלית','כלי שיט ישראלי','קבוצת כלי שיט ישראליים','כלי שיט שאינו ישראלי'],'שני אפסים בהתחלה, ואחריהם קוד המדינה: תחנת חוף.'],
+ ['','למי שייך ה-MMSI ‏042812345?',['קבוצת כלי שיט ישראליים','תחנת חוף ישראלית','כלי שיט ישראלי','מכשיר VHF נייד'],'אפס אחד בהתחלה, ואחריו קוד המדינה: MMSI קבוצתי. קריאה אליו מצלצלת בכל כלי השיט שבקבוצה.'],
+ ['','למי שייך ה-MMSI ‏247085300?',['כלי שיט שאינו ישראלי','כלי שיט ישראלי','תחנת חוף','קבוצת כלי שיט'],'המספר מתחיל ישר בקוד מדינה, אבל הקוד אינו 428. זה כלי שיט שרשום במדינה אחרת.'],
+ ['','למי שייך ה-MMSI ‏970123456?',['משואת AIS-SART','כלי שיט ישראלי','תחנת חוף','קבוצת כלי שיט'],'מספרים שמתחילים ב-970 שמורים למשואות AIS-SART.'],
+ ['','איזה מהמספרים האלה אינו יכול להיות MMSI תקין?',['42812345','428123456','004280001','042812345'],'MMSI הוא תמיד בן 9 ספרות. במספר הזה יש 8 בלבד.']
+];
+function quizDef(title,sit,qs){
+  const steps=shuffle(qs.slice()).map(mkQ);
+  return {id:'drill',paper:true,title,sit,steps,again:()=>quizDef(title,sit,qs),dynTips:()=>wrongTips(steps)};
+}
+function openDrills(){
+  openMenu('תרגולים מהירים','תרגול קצר של מיומנות אחת בכל פעם.',[
+    ['איות פונטי: 6 שמות ואותיות קריאה',phonDef],
+    [`פענוח קוד NAVTEX (${NAVQ.length})`,()=>quizDef('פענוח קוד NAVTEX','כל הודעת NAVTEX נפתחת ב-ZCZC ובקוד של ארבעה תווים: תחנה, נושא ומספר סידורי.',NAVQ)],
+    [`זיהוי MMSI (${MMSIQ.length})`,()=>quizDef('זיהוי MMSI','מהספרות הראשונות של ה-MMSI אפשר לדעת למי הוא שייך.',MMSIQ)]
+  ]);
 }
 
 SC.forEach(d=>{d.brief=BRIEF[d.id];(WHY[d.id]||[]).forEach((w,i)=>{if(w&&d.steps[i])d.steps[i].w=w;});});
@@ -1496,6 +1565,10 @@ function drawHome(){
   k.innerHTML=`<div class="sc-top"><span class="tag t-b">תאוריה</span>${best.bank!=null?`<span class="best">שיא: ${best.bank}%</span>`:''}</div><div class="sc-title">מאגר שאלות עיוניות</div><div class="sc-desc">${BANK.length} שאלות רב-ברירה ב-${Object.keys(TOPICS).length} נושאים, עם הסבר לכל תשובה</div>`;
   k.onclick=openTopics;
   list.insertBefore(k,x.nextSibling);
+  const dr=document.createElement('button');dr.className='sc';
+  dr.innerHTML='<div class="sc-top"><span class="tag t-r">תרגול מהיר</span></div><div class="sc-title">תרגולים מהירים</div><div class="sc-desc">איות פונטי, פענוח קוד NAVTEX וזיהוי MMSI</div>';
+  dr.onclick=openDrills;
+  list.insertBefore(dr,k.nextSibling);
   const f=document.createElement('button');f.className='sc';
   f.innerHTML='<div class="sc-top"><span class="tag t-b">FREE</span></div><div class="sc-title">מצב חופשי</div><div class="sc-desc">תפעול חופשי של המכשיר, בלי תרחיש ובלי ציון</div>';
   f.onclick=()=>startScenario(null);list.appendChild(f);
