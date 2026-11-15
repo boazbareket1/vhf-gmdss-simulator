@@ -136,13 +136,54 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 .score{font-size:2.6rem;font-weight:800;font-family:var(--mono);margin:4px 0}
 .score.pass{color:var(--ok)}.score.fail{color:var(--err)}
 .tips{margin:8px 0 0;padding:0 18px 0 0;font-size:.9rem}.tips li{margin-bottom:5px}
+
+/* ---------- access gate ---------- */
+.gatebox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px;max-width:420px}
+.gatebox label{font-size:.85rem;color:var(--mute);font-weight:600}
+.gatebox input{font-family:var(--mono);font-size:1.2rem;letter-spacing:.12em;padding:10px 12px;border-radius:10px;border:1px solid #3b5d73;background:#0a121a;color:var(--ink);width:100%}
+.gatebox input:focus{outline:2px solid var(--amber);outline-offset:1px}
+.gatebox .fb{margin-top:0}
+
+/* ---------- learning ---------- */
+.sec-h{font-size:.8rem;color:var(--mute);font-weight:700;margin:18px 0 8px;letter-spacing:.04em}
+.sc.lead{border-color:#6b5320;background:#1c2a31}
+.guide details{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;padding:0 14px}
+.guide summary{cursor:pointer;font-weight:700;padding:12px 0;font-size:1rem}
+.guide details[open] summary{border-bottom:1px solid var(--line);margin-bottom:10px}
+.guide p,.guide li{font-size:.92rem;color:#d5dfe7}
+.guide p{margin:6px 0 12px}
+.guide ul,.guide ol{padding:0 20px 0 0;margin:6px 0 12px}
+.guide li{margin-bottom:4px}
+.guide h3{font-size:.9rem;margin:14px 0 4px;color:var(--amber);direction:rtl}
+.tpl{direction:ltr;text-align:left;font-family:var(--mono);font-size:.78rem;background:#0a121a;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0 12px;white-space:pre-wrap;line-height:1.5;color:#cfe3f1}
+.gt{width:100%;border-collapse:collapse;font-size:.86rem;margin:6px 0 12px}
+.gt td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:right;vertical-align:top;color:#d5dfe7}
+.gt td:first-child{font-family:var(--mono);font-weight:700;white-space:nowrap;direction:ltr;text-align:right;color:var(--ink);padding-left:12px}
+.why{font-size:.84rem;margin-top:6px;color:#c5d3de}
+.why summary{cursor:pointer;color:var(--amber);font-weight:600}
+.hint{white-space:pre-line}
+.sel{outline:2px solid var(--amber)!important;outline-offset:2px}
+@media(max-width:859px){.coach{max-height:60vh;overflow:auto}}
 @media(prefers-reduced-motion:reduce){.blink,.chip.bad{animation:none}.pbar i{transition:none}}
 </style>
 </head>
 <body>
 
+<!-- ============ ACCESS GATE ============ -->
+<main id="gate" class="wrap" hidden>
+  <h1 class="h-title">סימולטור <span style="white-space:nowrap">VHF-DSC</span> לתרגול GMDSS</h1>
+  <p class="h-sub">הכניסה לסימולטור היא באמצעות קוד גישה.</p>
+  <div class="gatebox">
+    <label for="g-code">קוד גישה</label>
+    <input id="g-code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" dir="ltr">
+    <button class="btn" id="g-go">כניסה</button>
+    <div class="fb err" id="g-err" hidden>הקוד שגוי. בדוק אותו ונסה שוב.</div>
+  </div>
+  <p class="note">אין לך קוד? פנה למי ששלח לך את הקישור.</p>
+</main>
+
 <!-- ============ HOME ============ -->
-<main id="home" class="wrap">
+<main id="home" class="wrap" hidden>
   <h1 class="h-title">סימולטור <span style="white-space:nowrap">VHF-DSC</span> לתרגול GMDSS</h1>
   <p class="h-sub">מכשיר קשר ימי נייח (Class D) כפי שמותקן ביאכטה. בחר תרחיש ותפעל את המכשיר בעצמך.</p>
   <div class="ship">
@@ -151,12 +192,283 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
     <div>MMSI<b>428123456</b></div>
     <div>אנשים על הסיפון<b>4</b></div>
   </div>
+  <h2 class="sec-h">ללמוד</h2>
+  <div class="list">
+    <button class="sc lead" id="go-guide"><div class="sc-title">מדריך: נהלים ודרכי חשיבה</div><div class="sc-desc">איך מחליטים על עדיפות, תבניות ההודעות, ערוצים, מילות נוהל וטעויות נפוצות במבחן</div></button>
+    <button class="sc lead" id="go-explain"><div class="sc-title">הכר את המכשיר</div><div class="sc-desc">הקש על כל מקש וקרא מה הוא עושה ומתי משתמשים בו</div></button>
+  </div>
+  <h2 class="sec-h">לתרגל</h2>
   <div class="seg" role="group" aria-label="מצב עבודה">
-    <button id="m-prac">תרגול — עם רמזים</button>
+    <button id="m-prac">תרגול — עם הסברים</button>
     <button id="m-exam">מבחן — בלי רמזים</button>
   </div>
   <div class="list" id="list"></div>
   <p class="note">המכשיר בסימולטור הוא מכשיר Class D גנרי, והנהלים לפי תקנות הרדיו של ITU. סדר התפריטים ומשך הלחיצה על DISTRESS משתנים בין יצרנים — בדוק את המכשיר שעליו תיבחן ואת חומר הקורס שלך.</p>
+  <button class="tb-btn" id="logout">יציאה והחלפת קוד גישה</button>
+</main>
+
+<!-- ============ GUIDE ============ -->
+<main id="guide" class="wrap guide" hidden>
+  <button class="tb-btn" id="g-back">חזרה למסך הראשי</button>
+  <h1 class="h-title">מדריך: נהלים ודרכי חשיבה</h1>
+  <p class="h-sub">מה צריך להבין כדי לתפעל את המכשיר נכון ולענות מדויק במבחן. הקש על כותרת כדי לפתוח אותה.</p>
+
+  <details open>
+    <summary>איך ללמוד עם הכלי</summary>
+    <ol>
+      <li>קרא את המדריך הזה פעם אחת, מההתחלה עד הסוף.</li>
+      <li>פתח את "הכר את המכשיר" והקש על כל מקש, עד שאתה יודע מה כל אחד עושה בלי לקרוא.</li>
+      <li>תרגל כל תרחיש במצב תרגול. קרא את התדריך שבתחילתו, ופתח את "למה עושים את זה?" בכל שלב.</li>
+      <li>חזור על כל תרחיש במצב מבחן, בלי רמזים, עד שאתה מגיע ל-100% פעמיים ברצף.</li>
+      <li>סיים ב"שאלות חזרה" וב"שאלת מצוקה בפורמט המבחן", עד שאתה כותב את כל הנוהל בלי לטעות.</li>
+    </ol>
+    <p>המטרה אינה לזכור איזה מקש ללחוץ, אלא להבין למה. מי שמבין את ההיגיון יסתדר גם עם מכשיר של יצרן אחר וגם עם שאלה שמנוסחת אחרת.</p>
+  </details>
+
+  <details>
+    <summary>שאלת המצוקה במבחן: מבנה התשובה</summary>
+    <p>בשאלת מצוקה מקבלים תיאור מצב עם שם הכלי, MMSI, מיקום ומספר האנשים, וכותבים את כל הנוהל. התשובה בנויה תמיד באותו סדר:</p>
+    <ol>
+      <li><b>ACTIVATE EPIRB A.S.A.P</b> — מפעילים את משואת המצוקה מוקדם ככל האפשר.</li>
+      <li><b>SEND DISTRESS ALERT ON DSC CH 70, 25W</b> — בבקר ה-DSC: ‏DISTRESS, סוג המצוקה, עדכון שעה ומיקום, שליחה.</li>
+      <li><b>SEND DISTRESS CALL ON VHF CH 16, 25W, SET SQUELCH</b> — ‏MAYDAY ×3, שם הכלי ×3, ‏MMSI ספרה-ספרה.</li>
+      <li><b>SEND DISTRESS MESSAGE ON VHF CH 16, 25W</b> — ‏MAYDAY, שם הכלי, קו רוחב, קו אורך, מהות המצוקה, REQUIRE IMMEDIATE ASSISTANCE, מספר האנשים, OVER.</li>
+      <li><b>בנטישה</b> — EPIRB במים, קשור לאסדת ההצלה. SART מופעל ותלוי גבוה ככל האפשר. VHF נייד מכוון לערוץ 16 בהספק מרבי, עם סוללות רזרביות.</li>
+    </ol>
+    <h3>שלושה דברים שקל לפספס</h3>
+    <ul>
+      <li><b>מספר האנשים:</b> מחברים צוות ונוסעים. 3 אנשי צוות ו-4 נוסעים הם SEVEN PERSONS ON BOARD.</li>
+      <li><b>MMSI ומיקום</b> נכתבים במילים, ספרה-ספרה. קו אורך נכתב בשלוש ספרות: ZERO THREE FOUR DEGREES.</li>
+      <li><b>סוג המצוקה ב-DSC</b> נבחר לפי מה שקרה בפועל. אם הסקיפר הכריז על נטישה, בוחרים ABANDONING SHIP.</li>
+    </ul>
+    <h3>סעיף ב: הנושאים שחוזרים</h3>
+    <div class="tpl">הטלת דממת קשר על מי שמפריע:
+MAYDAY
+ALL STATIONS
+SEELONCE MAYDAY
+OUT</div>
+    <div class="tpl">הודעה על סיום מצב המצוקה:
+MAYDAY
+ALL STATIONS, ALL STATIONS, ALL STATIONS
+THIS IS [NAME], [NAME], [NAME]
+MMSI [DIGIT BY DIGIT]
+[TIME] UTC
+[NAME OF VESSEL THAT WAS IN DISTRESS]
+SEELONCE FEENEE
+OUT</div>
+    <ul>
+      <li><b>PRUDONCE</b> במקום SEELONCE FEENEE: המצוקה עוד לא הסתיימה, אבל מותר לחדש תעבורה מוגבלת.</li>
+      <li><b>אישור קבלה מכלי אחר:</b> בקול בערוץ 16, ומסתיים ב-RECEIVED MAYDAY, OVER.</li>
+      <li><b>מי מפקח על תעבורת המצוקה:</b> הכלי שבמצוקה. אם אינו מסוגל, הפיקוח עובר לכלי שיט אחר או לתחנת חוף שבטווח קליטה.</li>
+      <li><b>SART שמנצנץ ומצפצף באסדה:</b> הוא קלט מכ"ם X-BAND של כלי שיט קרוב. מתצפתים, קוראים ב-VHF הנייד, ואם רואים כלי שיט מפעילים פירוטכניקה.</li>
+      <li><b>12 קשתות על מסך המכ"ם:</b> משיב SART פועל בקרבת מקום. הקשת הקרובה למרכז המסך מסמנת את מקומו.</li>
+      <li><b>EPIRB:</b> משדר ללווייני LEOSAR, שעוברים מעל כל נקודה בערך פעם בשעה וחצי.</li>
+      <li><b>NAVTEX:</b> האמצעי שבו ה-MRCC מרחיב את החיפוש אל מעבר לטווח ה-VHF.</li>
+    </ul>
+    <p>המבנה והתשובות בסעיף הזה הם לפי חומר הקורס.</p>
+  </details>
+
+  <details>
+    <summary>ארבע שאלות לפני שנוגעים במכשיר</summary>
+    <ol>
+      <li><b>מה חומרת המצב?</b> התשובה קובעת את העדיפות: מצוקה, דחיפות, בטיחות או שגרה.</li>
+      <li><b>למי אני פונה?</b> לכל התחנות, או לכלי אחד מסוים.</li>
+      <li><b>איך אני מצלצל?</b> בלחצן DISTRESS, בקריאת ALL SHIPS או בקריאת INDIVIDUAL.</li>
+      <li><b>מה אני אומר, ובאיזה ערוץ?</b> תבנית ההודעה, ערוץ 16 או ערוץ עבודה, וסיום ב-OVER או ב-OUT.</li>
+    </ol>
+    <p>כמעט כל שאלה במבחן, עיונית או מעשית, היא אחת מארבע השאלות האלה או שילוב שלהן.</p>
+  </details>
+
+  <details>
+    <summary>איזו עדיפות? MAYDAY, PAN PAN, SECURITE או שגרה</summary>
+    <h3>מצוקה — DISTRESS — MAYDAY</h3>
+    <ul>
+      <li><b>מתי:</b> סכנה חמורה ומיידית לחיים או לכלי, ודרושה עזרה מיידית.</li>
+      <li><b>איך:</b> לחצן DISTRESS, ואחריו MAYDAY בקול בערוץ 16.</li>
+      <li><b>דוגמאות:</b> שריפה שאינה בשליטה, חדירת מים שאי אפשר לעצור, אדם שנפל לים ואבד איתו קשר עין, נטישת הכלי.</li>
+    </ul>
+    <h3>דחיפות — URGENCY — PAN PAN</h3>
+    <ul>
+      <li><b>מתי:</b> הודעה דחופה מאוד על בטיחות הכלי או על בטיחות אדם, בלי סכנה מיידית.</li>
+      <li><b>איך:</b> ALL SHIPS CALL בעדיפות URGENCY, ואחריו PAN PAN בקול בערוץ 16.</li>
+      <li><b>דוגמאות:</b> מנוע מושבת וסחיפה, אובדן הגה, חולה או פצוע שזקוק לייעוץ רפואי.</li>
+    </ul>
+    <h3>בטיחות — SAFETY — SECURITE</h3>
+    <ul>
+      <li><b>מתי:</b> מידע שחשוב לבטיחות השיט של אחרים. אתה עצמך לא בסכנה.</li>
+      <li><b>איך:</b> ALL SHIPS CALL בעדיפות SAFETY, ואחריו SECURITE בקול.</li>
+      <li><b>דוגמאות:</b> חפץ צף מסוכן, עזר ניווט שכבה, אזהרת מזג אוויר.</li>
+    </ul>
+    <h3>שגרה — ROUTINE</h3>
+    <ul>
+      <li><b>מתי:</b> כל שיחה אחרת.</li>
+      <li><b>איך:</b> INDIVIDUAL CALL לפי MMSI, ומעבר לערוץ עבודה.</li>
+    </ul>
+    <p><b>שאלת ההכרעה בין MAYDAY ל-PAN PAN:</b> האם מישהו עלול למות, או שהכלי עלול לאבוד, אם העזרה לא תגיע מיד? אם כן — MAYDAY. מצב יכול גם להחמיר: PAN PAN שהפך למסוכן משודרג ל-MAYDAY.</p>
+  </details>
+
+  <details>
+    <summary>למה קודם DSC ורק אחר כך קול</summary>
+    <ul>
+      <li>ה-DSC הוא הצלצול: הודעה דיגיטלית קצרה בערוץ 70, שמפעילה אזעקה בכל מכשיר בטווח.</li>
+      <li>התראת מצוקה כוללת אוטומטית את ה-MMSI, המיקום, השעה וסוג המצוקה (אם בחרת אותו).</li>
+      <li>אחרי השליחה המכשיר עובר לערוץ 16. ממתינים כ-15 שניות לאישור, ומשדרים MAYDAY בקול גם אם לא הגיע.</li>
+      <li>בלי אישור, המכשיר משדר את ההתראה שוב לבד, כל 3.5 עד 4.5 דקות.</li>
+      <li>רק תחנת חוף מאשרת התראת מצוקה ב-DSC. כלי שיט שקיבל התראה מאזין בערוץ 16.</li>
+      <li>הקול הוא ההסבר: מה קרה, איזו עזרה דרושה וכמה אנשים על הסיפון.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>תבניות ההודעות</summary>
+    <h3>קריאת מצוקה והודעת מצוקה (MAYDAY)</h3>
+    <div class="tpl">DISTRESS CALL — CH 16, 25W
+MAYDAY, MAYDAY, MAYDAY
+THIS IS [NAME], [NAME], [NAME]
+MMSI [DIGIT BY DIGIT]
+
+DISTRESS MESSAGE — CH 16, 25W
+MAYDAY
+[NAME]
+[LATITUDE, DIGIT BY DIGIT]
+[LONGITUDE, DIGIT BY DIGIT]
+[NATURE OF DISTRESS]
+REQUIRE IMMEDIATE ASSISTANCE
+[N] PERSONS ON BOARD
+OVER</div>
+    <p>ההודעה עונה על ארבע שאלות, תמיד בסדר הזה: מי, איפה, מה קרה ומה דרוש, וכמה אנשים.</p>
+    <h3>הודעת PAN PAN</h3>
+    <div class="tpl">PAN PAN, PAN PAN, PAN PAN
+ALL STATIONS, ALL STATIONS, ALL STATIONS
+THIS IS [NAME], [NAME], [NAME]
+CALLSIGN [...], MMSI [...]
+MY POSITION IS [LAT] [LONG]
+[NATURE OF URGENCY]
+[ASSISTANCE REQUIRED]
+OVER</div>
+    <h3>הודעת SECURITE</h3>
+    <div class="tpl">SECURITE, SECURITE, SECURITE
+ALL STATIONS, ALL STATIONS, ALL STATIONS
+THIS IS [NAME], [NAME], [NAME]
+[SAFETY MESSAGE]
+OUT</div>
+    <h3>אישור קבלת MAYDAY בקול</h3>
+    <div class="tpl">MAYDAY
+[VESSEL IN DISTRESS] x3
+THIS IS [MY NAME] x3
+RECEIVED MAYDAY
+OVER</div>
+    <h3>MAYDAY RELAY — העברת מצוקה של כלי אחר</h3>
+    <div class="tpl">MAYDAY RELAY, MAYDAY RELAY, MAYDAY RELAY
+ALL STATIONS, ALL STATIONS, ALL STATIONS
+THIS IS [MY NAME] x3
+MMSI [MY MMSI], [MY POSITION]
+FOLLOWING RECEIVED MAYDAY AT [TIME] UTC
+QUOTE
+[THE DISTRESS MESSAGE, WORD FOR WORD]
+UNQUOTE
+NO FURTHER INFORMATION
+VESSELS IN VICINITY PLEASE SEARCH AND ASSIST
+OVER</div>
+    <h3>ביטול התראת מצוקה שנשלחה בטעות</h3>
+    <div class="tpl">ALL STATIONS, ALL STATIONS, ALL STATIONS
+THIS IS [NAME], [NAME], [NAME]
+CALLSIGN [...], MMSI [...]
+POSITION [LAT] [LONG]
+PLEASE CANCEL MY DISTRESS ALERT OF [TIME] UTC
+OVER</div>
+    <h3>שיחה שגרתית, בערוץ העבודה</h3>
+    <div class="tpl">[CALLED STATION], [CALLED STATION]
+THIS IS [MY NAME], [MY NAME]
+[MESSAGE]
+OVER</div>
+  </details>
+
+  <details>
+    <summary>ערוצים שחייבים לזכור</summary>
+    <table class="gt">
+      <tr><td>16</td><td>מצוקה, בטיחות וקריאה, בקול. זה ערוץ ההאזנה הקבוע בזמן הפלגה.</td></tr>
+      <tr><td>70</td><td>DSC בלבד: קריאות דיגיטליות. אי אפשר לדבר בו, והמכשיר לא נותן לבחור אותו.</td></tr>
+      <tr><td>06</td><td>ערוץ בין-ספינתי ראשי. משמש גם לתיאום חיפוש והצלה.</td></tr>
+      <tr><td>08, 72, 77</td><td>ערוצים בין-ספינתיים: ערוצי עבודה לשיחות בין כלי שיט.</td></tr>
+      <tr><td>13</td><td>בטיחות ניווט בין גשרי פיקוד של אוניות.</td></tr>
+    </table>
+    <p>ערוצי נמלים ומרינות נקבעים מקומית. בדוק אותם בפרסומים של המרינה או בחומר הקורס.</p>
+  </details>
+
+  <details>
+    <summary>מילות נוהל</summary>
+    <table class="gt">
+      <tr><td>THIS IS</td><td>כאן. אחריה בא שם התחנה המשדרת.</td></tr>
+      <tr><td>OVER</td><td>סיימתי, ואני מחכה לתשובה.</td></tr>
+      <tr><td>OUT</td><td>סיימתי, ואיני מחכה לתשובה. לא אומרים "OVER AND OUT".</td></tr>
+      <tr><td>RECEIVED</td><td>קיבלתי את ההודעה.</td></tr>
+      <tr><td>SAY AGAIN</td><td>חזור על ההודעה.</td></tr>
+      <tr><td>I SAY AGAIN</td><td>אני חוזר על ההודעה.</td></tr>
+      <tr><td>CORRECTION</td><td>טעיתי, והנוסח הנכון הוא…</td></tr>
+      <tr><td>I SPELL</td><td>אני מאיית באלפבית הפונטי.</td></tr>
+      <tr><td>STATION CALLING</td><td>פנייה לתחנה שקראה לי ולא קלטתי את שמה.</td></tr>
+      <tr><td>SEELONCE MAYDAY</td><td>דממת קשר: רק תעבורת המצוקה מותרת בערוץ.</td></tr>
+      <tr><td>SEELONCE FEENEE</td><td>תעבורת המצוקה הסתיימה, ואפשר לחזור לשגרה.</td></tr>
+      <tr><td>PRUDONCE</td><td>המצוקה עוד לא הסתיימה, אבל מותר לחדש תעבורה מוגבלת בערוץ.</td></tr>
+      <tr><td>MAYDAY RELAY</td><td>העברת הודעת מצוקה של כלי אחר.</td></tr>
+    </table>
+  </details>
+
+  <details>
+    <summary>MMSI — מספר הזהות של המכשיר</summary>
+    <table class="gt">
+      <tr><td>428123456</td><td>כלי שיט: 9 ספרות. שלוש הראשונות הן קוד המדינה (MID). הקוד של ישראל: 428.</td></tr>
+      <tr><td>00428xxxx</td><td>תחנת חוף: מתחיל ב-00, ואחריו קוד המדינה.</td></tr>
+      <tr><td>0428xxxxx</td><td>קבוצת כלי שיט: מתחיל ב-0 אחד.</td></tr>
+    </table>
+    <p>ה-MMSI מתוכנת במכשיר ומזהה אותו בכל קריאת DSC. ספרה שגויה אחת בהקלדה היא קריאה לכלי אחר, ולכן בודקים ספרה-ספרה לפני ENT.</p>
+  </details>
+
+  <details>
+    <summary>אלפבית פונטי, מספרים ומיקום</summary>
+    <div class="tpl">A Alfa     B Bravo    C Charlie  D Delta
+E Echo     F Foxtrot  G Golf     H Hotel
+I India    J Juliett  K Kilo     L Lima
+M Mike     N November O Oscar    P Papa
+Q Quebec   R Romeo    S Sierra   T Tango
+U Uniform  V Victor   W Whiskey  X X-ray
+Y Yankee   Z Zulu</div>
+    <ul>
+      <li><b>מספרים</b> נאמרים ספרה-ספרה. ערוץ 16 הוא "CHANNEL ONE SIX". השעה 1430 היא "ONE FOUR THREE ZERO UTC". גם MMSI נאמר ספרה-ספרה.</li>
+      <li><b>מיקום:</b> קודם קו הרוחב ואחריו קו האורך, מעלות ואז דקות, והכיוון בסוף: "THREE TWO DEGREES FIVE TWO MINUTES NORTH, ZERO THREE FOUR DEGREES FIVE TWO MINUTES EAST".</li>
+      <li><b>בלי GPS:</b> מוסרים כיוון ומרחק מנקודה מוכרת, למשל "THREE MILES WEST OF HAIFA PORT".</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>טעויות נפוצות</summary>
+    <ul>
+      <li>לשלוח התראת DSC ולא לדבר אחריה, או לדבר בלי לשלוח קודם DSC.</li>
+      <li>לומר MAYDAY על מצוקה של כלי אחר. הנוסח הנכון הוא MAYDAY RELAY.</li>
+      <li>לאשר התראת מצוקה ב-DSC מכלי שיט. האישור הדיגיטלי שמור לתחנת החוף.</li>
+      <li>לסיים ב-"OVER AND OUT", או לסיים הודעת SECURITE ב-OVER.</li>
+      <li>לנהל שיחה שגרתית בערוץ 16 במקום לעבור לערוץ עבודה.</li>
+      <li>לשכוח לחזור לערוץ 16 בסיום שיחה.</li>
+      <li>Squelch גבוה מדי, שמשתיק גם שידורים חלשים.</li>
+      <li>לשדר ב-25W לכלי קרוב, או ב-1W בקריאת מצוקה.</li>
+      <li>לכבות את המכשיר אחרי התראת שווא במקום לבטל ולהודיע.</li>
+      <li>למסור מיקום בסדר הפוך, או במספרים שלמים במקום ספרה-ספרה.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>איך לגשת לשאלה במבחן</summary>
+    <ul>
+      <li><b>חפש את מילות המפתח בתיאור המצב.</b> "סכנה מיידית", "טובע", "שריפה" מצביעות על מצוקה. "זקוק לגרירה", "ייעוץ רפואי" מצביעות על דחיפות. "מסכן את השיט", "אזהרה" מצביעות על בטיחות.</li>
+      <li><b>זהה את הנמען:</b> כל התחנות, או תחנה אחת.</li>
+      <li><b>בשאלה על ערוץ:</b> דיגיטלי הוא 70. קול למצוקה, לדחיפות ולבטיחות הוא 16. שיחה מתנהלת בערוץ עבודה.</li>
+      <li><b>בשאלה על נוסח:</b> ספור את החזרות (שלוש פעמים בקריאה), ובדוק את מילת הפתיחה ואת מילת הסיום.</li>
+      <li><b>במבחן המעשי:</b> הסתכל במסך לפני כל לחיצה, אמור בקול מה אתה עושה, ואל תלחץ ENT לפני שבדקת את ה-MMSI ואת העדיפות.</li>
+      <li><b>תשובות שכמעט תמיד שגויות:</b> לכבות את המכשיר, לאשר ב-DSC מכלי שיט, "OVER AND OUT", לדבר בערוץ 70.</li>
+    </ul>
+    <p>הנהלים כאן הם לפי תקנות הרדיו הבינלאומיות. אם חומר הקורס שלך מנסח משהו אחרת — במבחן עונים לפי חומר הקורס.</p>
+  </details>
 </main>
 
 <!-- ============ SIMULATOR ============ -->
@@ -164,6 +476,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
   <div class="topbar">
     <button class="tb-btn" id="exit">חזרה לתרחישים</button>
     <div class="ttl" id="sc-ttl"></div>
+    <button class="tb-btn" id="brief-btn" hidden>תדריך</button>
     <button class="tb-btn" id="snd">צליל: פועל</button>
   </div>
   <div class="pbar"><i id="bar"></i></div>
@@ -176,6 +489,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
         <div class="traffic" id="c-say" dir="ltr" hidden></div>
         <div class="quiz" id="c-quiz"></div>
         <div class="hint" id="c-hint"></div>
+        <details class="why" id="c-why" hidden><summary>למה עושים את זה?</summary><div id="c-why-tx"></div></details>
         <div class="fb" id="c-fb" hidden></div>
       </div>
     </section>
@@ -217,7 +531,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 <div class="modal" id="composer" hidden>
   <div class="sheet">
     <h2 id="cp-ttl"></h2>
-    <p>אתה משדר. הקש על חלקי ההודעה לפי הסדר שבו אומרים אותם.</p>
+    <p id="cp-sub"></p>
     <div class="script" id="cp-script"></div>
     <div class="pool" id="cp-pool"></div>
     <div class="cmsg" id="cp-msg"></div>
@@ -225,6 +539,16 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
       <button class="btn sec" id="cp-cancel">ביטול</button>
       <button class="btn" id="cp-done" hidden>שחרר PTT — סיום שידור</button>
     </div>
+  </div>
+</div>
+
+<!-- briefing -->
+<div class="modal" id="brief" hidden>
+  <div class="sheet">
+    <h2>תדריך: איך לחשוב על המצב</h2>
+    <p id="bf-sit"></p>
+    <ol class="tips" id="bf-list"></ol>
+    <div class="row"><button class="btn" id="bf-go">התחל</button></div>
   </div>
 </div>
 
@@ -258,8 +582,29 @@ const MENU=['INDIVIDUAL CALL','ALL SHIPS CALL','CALL LOG','OWN SHIP INFO'];
 const CATS=['SAFETY','URGENCY'];
 const SQ_T=3;
 
+/* Access gate. Codes are stored hashed: run codeHash('NEW CODE') in the browser console and put the result in ACCESS_HASHES. */
+const ACCESS_ON=true;
+const ACCESS_HASHES=['uz6kcn6zem'];
+function codeHash(s){
+  s=String(s).trim().toUpperCase();let h1=0xdeadbeef^7,h2=0x41c6ce57^7;
+  for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677);}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return (4294967296*(2097151&h2)+(h1>>>0)).toString(36);
+}
+function hasAccess(){
+  if(!ACCESS_ON)return true;
+  try{return ACCESS_HASHES.includes(localStorage.getItem('vhfsim.access'));}catch(_){return false;}
+}
+function tryCode(){
+  const h=codeHash($('g-code').value);
+  if(!ACCESS_HASHES.includes(h)){$('g-err').hidden=false;return;}
+  try{localStorage.setItem('vhfsim.access',h);}catch(_){}
+  $('g-err').hidden=true;$('g-code').value='';$('gate').hidden=true;$('home').hidden=false;window.scrollTo(0,0);
+}
+
 const R={on:false,mode:'off',ctx:{}};
-let S=null, practice=true, muted=false, lastDT='', H=null;
+let S=null, practice=true, muted=false, lastDT='', H=null, explain=false, X=null;
 const TM={r:[],s:[]};
 function later(fn,ms,scn){const id=setTimeout(fn,ms);TM[scn?'s':'r'].push(id);return id;}
 function clearT(all){TM.r.forEach(clearTimeout);TM.r=[];if(all){TM.s.forEach(clearTimeout);TM.s=[];}}
@@ -457,6 +802,7 @@ function key(k){
 /* ----- DISTRESS button ----- */
 function dDown(e){
   e.preventDefault();audio();
+  if(explain){showExpl('dbtn',$('dbtn'));return;}
   if(!R.on||R.mode==='boot'||!R.cover||H||R.dsctx)return;
   if(R.alarm){stopAlarm();emit({type:'alarm-silenced'});}
   if(R.distress){flash('DISTRESS ALREADY ACTIVE');return;}
@@ -481,6 +827,7 @@ function endHold(sent){
 /* ----- PTT ----- */
 function pttDown(e){
   e.preventDefault();audio();
+  if(explain){showExpl('ptt',$('ptt'));return;}
   if(!R.on||R.mode==='boot'||R.dsctx||H||C.open)return;
   if(R.alarm){stopAlarm();emit({type:'alarm-silenced'});}
   const st=cur();
@@ -540,7 +887,7 @@ function lcdHTML(){
   <div class="l-foot"><span>${SHIP.pos}</span></div><div class="l-banner">${banner}</div>`;
 }
 function render(){
-  const l=$('lcd');l.className='lcd'+(R.on?'':' off');l.innerHTML=R.on?lcdHTML():'';
+  const l=$('lcd');l.className='lcd'+(R.on?'':' off')+(explain&&X===EXPL.lcd?' sel':'');l.innerHTML=R.on?lcdHTML():'';
   $('pwr').classList.toggle('on',R.on);
   $('ptt').classList.toggle('on',!!R.tx&&!R.dsctx);
   $('dwell').classList.toggle('open',!!R.cover);
@@ -551,11 +898,14 @@ function render(){
 /* ================= voice composer ================= */
 const C={open:false};
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function openComposer(v){
+function openComposer(v,written){
   C.open=true;C.v=v;C.lines=v.lines.map(l=>typeof l==='function'?l():l);C.i=0;C.msg='';
   C.pool=shuffle(C.lines.map(t=>({t})).concat((v.decoys||[]).map(d=>({t:d.t,why:d.why,decoy:true}))));
-  R.tx=true;R.mode='main';R.ctx={};render();
-  $('cp-ttl').textContent=v.title+' — ערוץ '+R.ch;
+  if(!written){R.tx=true;R.mode='main';R.ctx={};}
+  render();
+  $('cp-ttl').textContent=written?v.title:v.title+' — ערוץ '+R.ch;
+  $('cp-sub').textContent=written?'הקש על חלקי התשובה לפי הסדר שבו כותבים אותם.':'אתה משדר. הקש על חלקי ההודעה לפי הסדר שבו אומרים אותם.';
+  $('cp-done').textContent=written?'סיום':'שחרר PTT — סיום שידור';
   drawComposer();$('composer').hidden=false;
 }
 function drawComposer(){
@@ -593,10 +943,10 @@ const D_MAYDAY={t:'MAYDAY, MAYDAY, MAYDAY',why:'MAYDAY שמור לסכנה חמ�
 const D_OUT={t:'OUT',why:'OUT מסיים את הקשר בלי לצפות לתשובה. כאן אתה מחכה לתשובה, ולכן OVER.'};
 const D_OVER={t:'OVER',why:'OVER מזמין תשובה. הודעת בטיחות לכל התחנות אינה מצפה לתשובה, ולכן מסיימים ב-OUT.'};
 const PRIO=(right)=>[
-  {t:'MAYDAY — מצוקה',ok:right==='d',why:'MAYDAY מיועד לסכנה חמורה ומיידית לחיים או לכלי. זה לא המצב כאן.'},
-  {t:'PAN PAN — דחיפות',ok:right==='u',why:'PAN PAN מיועד להודעה דחופה על בטיחות כלי או אדם. זה לא המצב כאן.'},
-  {t:'SECURITE — בטיחות',ok:right==='s',why:'SECURITE מיועד לאזהרת ניווט או מזג אוויר לכלל הכלים. זה לא המצב כאן.'}
-];
+  ['d','MAYDAY — מצוקה','MAYDAY מיועד לסכנה חמורה ומיידית לחיים או לכלי.'],
+  ['u','PAN PAN — דחיפות','PAN PAN מיועד להודעה דחופה על בטיחות כלי או אדם, כשאין סכנה מיידית.'],
+  ['s','SECURITE — בטיחות','SECURITE מיועד לאזהרת ניווט או מזג אוויר לכלל הכלים.']
+].map(([k,t,d])=>({t,ok:k===right,why:k===right?'נכון. '+d:d+' זה לא המצב כאן.'}));
 
 const SC=[
 {id:'setup',tag:'בסיס',cls:'t-b',title:'הכנת המכשיר לפני הפלגה',desc:'הפעלה, עוצמת שמע, Squelch, עוצמת שידור וערוץ 16',
@@ -629,9 +979,9 @@ const SC=[
    done:(e,r)=>!!r.distress,ok:'ההתראה שודרה בערוץ 70 עם ה-MMSI, המיקום והשעה. המכשיר עבר לערוץ 16 ולעוצמה גבוהה.'},
   {t:'המתן לאישור (ACK) מתחנת החוף, והשתק את צליל ההתראה.',h:'האישור מגיע תוך שניות. כשהמסך מציג RX DISTRESS ACK, לחץ על מקש כלשהו כדי להשתיק.',
    done:(e,r)=>e.type==='alarm-silenced'&&!!r.distress&&r.distress.acked},
-  {t:'שדר בקול בערוץ 16 את קריאת ה-MAYDAY ואת הודעת המצוקה.',h:'לחץ על PTT והרכב את ההודעה בסדר הנכון: קריאה, זיהוי, מיקום, מהות המצוקה, העזרה הנדרשת, מספר האנשים.',
+  {t:'שדר בקול בערוץ 16 את קריאת ה-MAYDAY ואת הודעת המצוקה.',h:'לחץ על PTT והרכב בסדר הנכון. קודם הקריאה: MAYDAY ×3, השם ×3, MMSI. אחריה ההודעה: MAYDAY והשם, קו רוחב, קו אורך, מהות המצוקה, העזרה הנדרשת, מספר האנשים, OVER.',
    voice:{id:'mayday',ch:16,hi:true,title:'קריאת MAYDAY',
-     lines:['MAYDAY, MAYDAY, MAYDAY',ID3,IDS,`MAYDAY ${SHIP.name}, ${SHIP.call}`,`MY POSITION IS ${SHIP.pos}`,'FIRE IN ENGINE ROOM, OUT OF CONTROL','I REQUIRE IMMEDIATE ASSISTANCE',`${SHIP.pob} PERSONS ON BOARD`,'OVER'],
+     lines:['MAYDAY, MAYDAY, MAYDAY',ID3,'MMSI FOUR TWO EIGHT ONE TWO THREE FOUR FIVE SIX',`MAYDAY ${SHIP.name}`,'THREE TWO DEGREES FIVE TWO MINUTES NORTH','ZERO THREE FOUR DEGREES FIVE TWO MINUTES EAST','FIRE IN ENGINE ROOM, OUT OF CONTROL','REQUIRE IMMEDIATE ASSISTANCE','FOUR PERSONS ON BOARD','OVER'],
      decoys:[D_PANPAN,D_OUT]},
    done:e=>e.type==='voice-done'&&e.id==='mayday'},
   {t:'נניח שלא היה מתקבל אישור DSC. מה המכשיר היה עושה?',quiz:[
@@ -652,15 +1002,15 @@ const SC=[
     {t:'שולחים מיד אישור (ACK) ב-DSC',why:'כלי שיט לא מאשר התראת מצוקה ב-DSC — זה תפקיד תחנת החוף. אישור מוקדם עלול לעצור את השידור החוזר של הכלי שבמצוקה.'},
     {t:'מאזינים בערוץ 16, ונותנים לתחנת החוף זמן לאשר',ok:true,why:'נכון. מאזינים להודעת ה-MAYDAY הקולית ומחכים כמה דקות לאישור של תחנת חוף.'},
     {t:'משתיקים וממשיכים בהפלגה — זה לא הכלי שלי',why:'חובה להאזין ולהיות מוכן לסייע או להעביר את ההודעה הלאה.'}]},
-  {t:'שמעת את הודעת ה-MAYDAY. חלפו 5 דקות ואף תחנת חוף לא אישרה. אשר קבלה בקול.',h:'לחץ PTT בערוץ 16. המבנה: MAYDAY, שם הכלי שבמצוקה ×3, THIS IS והשם שלך ×3, RECEIVED MAYDAY.',
+  {t:'שמעת את הודעת ה-MAYDAY. חלפו 5 דקות ואף תחנת חוף לא אישרה. אשר קבלה בקול.',h:'לחץ PTT בערוץ 16. המבנה: MAYDAY, שם הכלי שבמצוקה ×3, THIS IS והשם שלך ×3, RECEIVED MAYDAY, OVER.',
    say:'<b>CH16 ·</b> MAYDAY, MAYDAY, MAYDAY. THIS IS ORION, ORION, ORION, MMSI 428765432. MAYDAY ORION. POSITION 32°58\'N 034°48\'E. SINKING AFTER COLLISION. REQUIRE IMMEDIATE ASSISTANCE. 3 PERSONS ON BOARD. OVER.',
    voice:{id:'ack',ch:16,hi:true,title:'אישור קבלת MAYDAY',
-     lines:['MAYDAY','ORION, ORION, ORION',ID3,'RECEIVED MAYDAY'],
+     lines:['MAYDAY','ORION, ORION, ORION',ID3,'RECEIVED MAYDAY','OVER'],
      decoys:[{t:'MAYDAY RELAY, MAYDAY RELAY, MAYDAY RELAY',why:'כרגע אתה מאשר קבלה לכלי שבמצוקה. ה-RELAY בא אחר כך.'},D_PANPAN]},
    done:e=>e.type==='voice-done'&&e.id==='ack'},
-  {t:'תחנת החוף עדיין לא נשמעת. העבר את הודעת המצוקה הלאה: MAYDAY RELAY.',h:'לחץ PTT בערוץ 16. פותחים ב-MAYDAY RELAY ×3, מזדהים, ואז מוסרים את פרטי הכלי שבמצוקה.',
+  {t:'תחנת החוף עדיין לא נשמעת. העבר את הודעת המצוקה הלאה: MAYDAY RELAY.',h:'לחץ PTT בערוץ 16. פותחים ב-MAYDAY RELAY ×3, פונים לכל התחנות, מזדהים, ואז מצטטים את הודעת המצוקה בין QUOTE ל-UNQUOTE.',
    voice:{id:'relay',ch:16,hi:true,title:'MAYDAY RELAY',
-     lines:['MAYDAY RELAY, MAYDAY RELAY, MAYDAY RELAY','ALL STATIONS, ALL STATIONS, ALL STATIONS',ID3+`, ${SHIP.call}`,'FOLLOWING RECEIVED FROM ORION, MMSI 428765432',"MAYDAY ORION, POSITION 32°58'N 034°48'E",'SINKING AFTER COLLISION, REQUIRES IMMEDIATE ASSISTANCE','3 PERSONS ON BOARD','OVER'],
+     lines:['MAYDAY RELAY, MAYDAY RELAY, MAYDAY RELAY','ALL STATIONS, ALL STATIONS, ALL STATIONS',ID3,'MMSI FOUR TWO EIGHT ONE TWO THREE FOUR FIVE SIX','FOLLOWING RECEIVED MAYDAY ON CHANNEL ONE SIX','QUOTE',"MAYDAY ORION, MMSI 428765432, POSITION 32°58'N 034°48'E",'SINKING AFTER COLLISION, REQUIRE IMMEDIATE ASSISTANCE, THREE PERSONS ON BOARD','UNQUOTE','VESSELS IN VICINITY PLEASE ASSIST','OVER'],
      decoys:[{t:'MAYDAY, MAYDAY, MAYDAY',why:'המצוקה אינה שלך. כשמעבירים מצוקה של כלי אחר פותחים ב-MAYDAY RELAY.'},D_OUT]},
    done:e=>e.type==='voice-done'&&e.id==='relay'}
  ],
@@ -764,8 +1114,213 @@ const SC=[
     {t:'נשארים בהאזנה בערוץ 16 ועונים לתחנת החוף אם תפנה',ok:true,why:'נכון. תחנת החוף עשויה לבקש אישור שאין מצוקה.'},
     {t:'שולחים התראה נוספת כדי לוודא שהביטול התקבל',why:'התראה נוספת היא התראת שווא נוספת.'}]}
  ],
- tips:['התראת שווא מבטלים מיד — לא מתעלמים ולא מכבים את המכשיר.','עוצרים את השידור החוזר במכשיר, ואז מודיעים בקול בערוץ 16.','ההודעה נפתחת ב-ALL STATIONS ×3 וכוללת זיהוי מלא ואת שעת ההתראה.','נשארים בהאזנה בערוץ 16.']}
+ tips:['התראת שווא מבטלים מיד — לא מתעלמים ולא מכבים את המכשיר.','עוצרים את השידור החוזר במכשיר, ואז מודיעים בקול בערוץ 16.','ההודעה נפתחת ב-ALL STATIONS ×3 וכוללת זיהוי מלא ואת שעת ההתראה.','נשארים בהאזנה בערוץ 16.']},
+
+{id:'theory',paper:true,tag:'תאוריה',cls:'t-b',title:'שאלות חזרה: נהלים, ערוצים ו-DSC',desc:'13 שאלות רב-ברירה על החומר שבמדריך, עם הסבר לכל תשובה',
+ sit:'שאלות חזרה על החומר שבמדריך. לכל תשובה יש הסבר.',
+ steps:[
+  {t:'באיזה ערוץ משודרות קריאות DSC ב-VHF?',quiz:[
+    {t:'ערוץ 16',why:'ערוץ 16 הוא ערוץ הקול למצוקה, לבטיחות ולקריאה. ה-DSC משודר בערוץ 70.'},
+    {t:'ערוץ 70',ok:true,why:'נכון. ערוץ 70 שמור ל-DSC בלבד, ואי אפשר לדבר בו.'},
+    {t:'ערוץ 13',why:'ערוץ 13 משמש לבטיחות ניווט בין גשרי פיקוד. ה-DSC משודר בערוץ 70.'}]},
+  {t:'מה כוללת התראת המצוקה שנשלחת בלחצן DISTRESS?',quiz:[
+    {t:'שם הכלי, מספר האנשים והעזרה הנדרשת',why:'את אלה מוסרים בקול. ההתראה הדיגיטלית כוללת MMSI, מיקום, שעה וסוג מצוקה.'},
+    {t:'MMSI, מיקום, שעה וסוג המצוקה',ok:true,why:'נכון. את כל השאר מוסרים אחר כך בקול, בערוץ 16.'},
+    {t:'הקלטה קולית של קריאת MAYDAY',why:'DSC הוא הודעה דיגיטלית קצרה, בלי קול.'}]},
+  {t:'מי מאשר התראת מצוקה ב-DSC?',quiz:[
+    {t:'תחנת חוף',ok:true,why:'נכון. כלי שיט מאזין בערוץ 16, ואם צריך — מאשר בקול.'},
+    {t:'כל כלי שיט שקיבל את ההתראה',why:'אישור DSC מכלי שיט עלול לעצור את השידור החוזר לפני שתחנת חוף קלטה את ההתראה. האישור הדיגיטלי שמור לתחנת החוף.'},
+    {t:'הכלי הקרוב ביותר לכלי שבמצוקה',why:'גם הכלי הקרוב לא מאשר ב-DSC. הוא מאזין בערוץ 16, ואם צריך — מאשר בקול.'}]},
+  {t:'אדם נפל לים בלילה ואיבדת איתו קשר עין. איזו עדיפות?',quiz:PRIO('d')},
+  {t:'איש צוות נפצע בידו. מצבו יציב, ואתה רוצה ייעוץ רפואי. איזו עדיפות?',quiz:PRIO('u')},
+  {t:'MMSI שמתחיל ב-00 שייך ל…',quiz:[
+    {t:'כלי שיט',why:'MMSI של כלי שיט מתחיל ישר בקוד המדינה, למשל 428.'},
+    {t:'תחנת חוף',ok:true,why:'נכון. 00, ואחריו קוד המדינה.'},
+    {t:'קבוצת כלי שיט',why:'MMSI קבוצתי מתחיל ב-0 אחד.'}]},
+  {t:'סיימת לדבר ואתה מצפה לתשובה. באיזו מילה מסיימים?',quiz:[
+    {t:'OUT',why:'OUT מסיים את הקשר בלי לצפות לתשובה.'},
+    {t:'OVER AND OUT',why:'זו סתירה: OVER מזמין תשובה ו-OUT מסיים. לא אומרים את שתיהן.'},
+    {t:'OVER',ok:true,why:'נכון. OVER פירושו: סיימתי, עבור אליך.'}]},
+  {t:'מה פירוש SEELONCE MAYDAY?',quiz:[
+    {t:'בקשה לחזור על ההודעה',why:'לזה משמש SAY AGAIN.'},
+    {t:'דממת קשר בערוץ: רק תעבורת המצוקה מותרת',ok:true,why:'נכון. הדממה נמשכת עד שמוכרז SEELONCE FEENEE.'},
+    {t:'המצוקה הסתיימה',why:'סיום תעבורת המצוקה מוכרז ב-SEELONCE FEENEE.'}]},
+  {t:'שיחה שגרתית עם כלי שנמצא חצי מייל ממך. באיזו עוצמה משדרים?',quiz:[
+    {t:'25W, כדי שישמעו בבירור',why:'משדרים בעוצמה הנמוכה ביותר שמספיקה. 25W מפריע לכלים רחוקים באותו ערוץ.'},
+    {t:'1W',ok:true,why:'נכון. עוצמה נמוכה מספיקה לטווח קצר.'},
+    {t:'העוצמה לא משנה',why:'העוצמה קובעת את הטווח, וגם את ההפרעה לאחרים.'}]},
+  {t:"איך אומרים את קו הרוחב 32°52'N?",quiz:[
+    {t:'THIRTY-TWO FIFTY-TWO NORTH',why:'מספרים נאמרים ספרה-ספרה, עם DEGREES ו-MINUTES.'},
+    {t:'THREE TWO DEGREES FIVE TWO MINUTES NORTH',ok:true,why:'נכון. ספרה-ספרה, מעלות ואז דקות, והכיוון בסוף.'},
+    {t:'NORTH THREE TWO POINT FIVE TWO',why:'הכיוון נאמר בסוף, ובין המעלות לדקות אין נקודה עשרונית.'}]},
+  {t:'איך מאייתים את שם הכלי TAMAR?',quiz:[
+    {t:'TANGO ALFA MIKE ALFA ROMEO',ok:true,why:'נכון.'},
+    {t:'TANGO ALFA MARY ALFA ROGER',why:'MARY ו-ROGER אינן באלפבית הפונטי הבינלאומי. M היא MIKE ו-R היא ROMEO.'},
+    {t:'TEA ALFA MIKE ALFA ROMEO',why:'T היא TANGO.'}]},
+  {t:'המכשיר דלוק אבל לא שומעים כלום ברמקול. מה בודקים קודם?',quiz:[
+    {t:'את עוצמת השידור (HI/LO)',why:'HI/LO משפיע רק על השידור שלך, לא על מה שאתה שומע.'},
+    {t:'את VOL, ואחריו את SQL',ok:true,why:'נכון. עוצמת שמע נמוכה או Squelch גבוה מדי הן הסיבות הנפוצות.'},
+    {t:'את ה-MMSI',why:'ה-MMSI הוא זהות המכשיר ב-DSC, ואינו קשור לשמע.'}]},
+  {t:'שלחת התראת מצוקה, ואחרי 15 שניות עדיין אין אישור. מה עושים?',quiz:[
+    {t:'ממתינים בשקט עד שיגיע אישור',why:'לא מחכים. משדרים MAYDAY בקול בערוץ 16, והמכשיר ממשיך לשדר את ההתראה לבד.'},
+    {t:'משדרים MAYDAY בקול בערוץ 16',ok:true,why:'נכון. ההתראה תשודר שוב אוטומטית, ובינתיים מוסרים את הפרטים בקול.'},
+    {t:'לוחצים שוב ושוב על DISTRESS',why:'המכשיר חוזר ומשדר לבד כל 4 דקות בערך. מה שחסר עכשיו הוא ההודעה הקולית.'}]}
+ ],
+ tips:['ערוץ 70 הוא DSC. ערוץ 16 הוא קול: מצוקה, דחיפות, בטיחות וקריאה.','העדיפות נקבעת בשאלה אחת: האם יש סכנה חמורה ומיידית לחיים או לכלי?','מספרים, מיקום ושעה נאמרים ספרה-ספרה.','OVER מזמין תשובה ו-OUT מסיים. אף פעם לא שתיהן יחד.']}
 ];
+
+/* ----- briefing: how to think about each scenario (shown in practice mode) ----- */
+const BRIEF={
+ setup:['לפני יציאה בודקים שלושה דברים: שומעים (VOL ו-SQL), משדרים בעוצמה הנכונה (HI/LO), ומאזינים בערוץ הנכון (16).','Squelch מכוונים תמיד מלמטה למעלה: קודם שומעים את הרעש, ואז מעלים עד שהוא בדיוק נעלם.','מבט במסך: האם יש מיקום ושעה מה-GPS? בלעדיהם התראת מצוקה תצא בלי מיקום.'],
+ distress:['השאלה הראשונה: איזו עדיפות? שריפה שאינה בשליטה היא סכנה חמורה ומיידית לחיים ולכלי — מצוקה.','קודם DSC: לחצן DISTRESS שולח בתוך שניות את ה-MMSI, המיקום והשעה לכל התחנות, גם אם לא תספיק לדבר.','אחר כך קול בערוץ 16, בעוצמה גבוהה: קריאת MAYDAY והודעת המצוקה בסדר הקבוע.','לא מחכים לאישור כדי לדבר. אם אין אישור, המכשיר משדר את ההתראה שוב לבד.'],
+ rxdistress:['זו מצוקה של כלי אחר. התפקיד שלך: להקשיב, לרשום ולא להפריע.','כלי שיט לא מאשר התראת מצוקה ב-DSC. האישור הדיגיטלי שמור לתחנת החוף.','נותנים לתחנת החוף כמה דקות. אם אף אחד לא עונה, אתה מאשר בקול ומעביר הלאה ב-MAYDAY RELAY.','ב-RELAY צריך להיות ברור כבר מהמילה הראשונה שהמצוקה אינה שלך.'],
+ panpan:['איזו עדיפות? יש בעיה רצינית שדורשת עזרה, אבל אין סכנה מיידית לחיים — דחיפות, PAN PAN.','למי פונים? לכל התחנות. לכן ALL SHIPS CALL מהתפריט, ולא לחצן DISTRESS.','אחרי ה-DSC באה הודעה בקול בערוץ 16. המבנה דומה ל-MAYDAY, עם PAN PAN ועם ALL STATIONS.','אם המצב מחמיר, למשל מתקרבים לסלעים, משדרגים ל-MAYDAY.'],
+ securite:['איזו עדיפות? אתה לא בסכנה, אבל יש לך מידע שחשוב לבטיחות של אחרים — בטיחות, SECURITE.','למי פונים? לכל התחנות: ALL SHIPS CALL בעדיפות SAFETY.','ההודעה היא שידור חד-כיווני. לא מצפים לתשובה, ולכן מסיימים ב-OUT.'],
+ routine:['שיחה שגרתית לא מתנהלת בערוץ 16. מצלצלים ב-DSC ישירות לכלי, ועוברים לערוץ עבודה.','שלוש החלטות: למי (ה-MMSI של הכלי), באיזה ערוץ נדבר (06, 08, 72 או 77), ובאיזו עוצמה (לכלי קרוב: 1W).','מדברים רק אחרי שהכלי השני אישר. בסיום חוזרים לערוץ 16.'],
+ rxroutine:['בקריאה שגרתית נכנסת המסך מראה מי קורא (MMSI) ובאיזה ערוץ הוא מציע לדבר.','אישור ב-ENT מעביר את שני המכשירים לערוץ העבודה. שם הקורא פותח, ואתה עונה.','בסיום: חזרה לערוץ 16.'],
+ cancel:['התראת שווא אינה אסון, כל עוד מבטלים אותה מיד. התעלמות עלולה להזניק חיפוש והצלה לחינם.','שני שלבים: עוצרים את השידור החוזר במכשיר, ואז מודיעים בקול בערוץ 16 לכל התחנות.','ההודעה נפתחת ב-ALL STATIONS ולא ב-MAYDAY, וכוללת זיהוי מלא ואת שעת ההתראה.','נשארים בהאזנה: תחנת החוף עשויה לפנות אליך.']
+};
+/* ----- the reasoning behind each step (shown in practice mode) ----- */
+const WHY={
+ setup:['מכשיר כבוי לא שומע התראות מצוקה ולא יכול לשלוח אותן.','קודם מוודאים שהרמקול עובד. הרעש הוא הסימן שהמקלט פעיל.','Squelch בסף הוא הפשרה הנכונה: שקט כשאין שידור, ועדיין רגיש לשידורים חלשים מרחוק.',null,'צריך לדעת בכל רגע באיזו עוצמה אתה משדר. המחוון נמצא בשורה העליונה של המסך.','חובת ההאזנה: כל כלי בים מאזין בערוץ 16, כדי שמי שבמצוקה יישמע.'],
+ distress:['המכסה מגן מפני התראת שווא. מרימים אותו רק אחרי שהחלטת שזו מצוקה.','סוג המצוקה נשלח יחד עם ההתראה, והמחלצים יודעים למה להתכונן עוד לפני שדיברת.','ההחזקה הארוכה מונעת שליחה בטעות. ההתראה הדיגיטלית מפעילה אזעקה בכל מכשיר בטווח, ומוסרת מיקום מדויק.','האישור אומר שתחנת חוף קיבלה את ההתראה ואת המיקום. מרגע זה המכשיר מפסיק לשדר אותה שוב.','ה-DSC רק מצלצל. בקול מוסרים את מה שאין בהתראה: מה קרה, איזו עזרה דרושה וכמה אנשים על הסיפון.'],
+ rxdistress:['האזעקה נועדה למשוך תשומת לב. משתיקים אותה כדי לשמוע את ערוץ 16.','הפרטים שבמסך הם מה שתמסור אם תצטרך להעביר את המצוקה הלאה. לכן רושמים אותם מיד.',null,'הכלי שבמצוקה צריך לדעת שמישהו שמע אותו. מחכים קודם לתחנת החוף כדי לא לחסום אותה.','ייתכן שתחנת החוף לא קלטה את הכלי שבמצוקה אבל תקלוט אותך. אתה משמש ממסר.'],
+ panpan:[null,'קריאת ALL SHIPS מצלצלת בכל המכשירים בטווח, ומכינה אותם להאזין להודעה שלך בערוץ 16.','עד שלא לחצת ENT במסך האישור, שום דבר לא שודר.','בהודעה הקולית מוסרים מה הבעיה ואיזו עזרה נדרשת. רק מילת הפתיחה והנמען שונים מ-MAYDAY.'],
+ securite:[null,'קריאת ALL SHIPS מצלצלת בכל המכשירים בטווח, ומכינה אותם להאזין להודעה שלך.','עד שלא לחצת ENT במסך האישור, שום דבר לא שודר.','המידע חשוב לכולם, אבל אינו מצדיק עדיפות גבוהה יותר. שידור קצר וברור, וסיום ב-OUT.'],
+ routine:['קריאה לפי MMSI מצלצלת רק במכשיר של הכלי המבוקש, ולא מעסיקה את ערוץ 16.','ערוץ העבודה נשלח בתוך הקריאה, כך ששני הצדדים יודעים מראש לאן לעבור.','בלי אישור אין טעם לדבר: ייתכן שהכלי השני לא שמע, או שאינו פנוי.','עוצמה נמוכה מספיקה לטווח קצר, ולא מפריעה לכלים רחוקים שמשתמשים באותו ערוץ.','בערוץ העבודה מספיקה קריאה קצרה. שתי התחנות כבר יודעות מי מדבר.','ערוץ העבודה מתפנה לאחרים, ואתה חוזר לחובת ההאזנה.'],
+ rxroutine:['צלצול שגרתי שונה מאזעקת מצוקה. מסתכלים במסך כדי לראות מי קורא ולאן הוא מציע לעבור.','האישור מודיע לקורא שאתה פנוי ועובר לערוץ שהציע.','הקורא פותח את השיחה, והנקרא עונה ומזמין אותו להמשיך.','ערוץ העבודה מתפנה לאחרים, ואתה חוזר לחובת ההאזנה.'],
+ cancel:[null,'כל עוד ההתראה פעילה, המכשיר ישדר אותה שוב כל כמה דקות.','התחנות שקיבלו את ההתראה צריכות לשמוע ממך שאין מצוקה. אחרת יתחיל חיפוש.',null]
+};
+/* ----- explain mode: what each control does ----- */
+const EXPL={
+ pwr:{t:'לחצן ההפעלה',d:'מדליק ומכבה את המכשיר. בהדלקה מוצג ה-MMSI — ודא שזה ה-MMSI של הכלי שלך.\nמכשיר כבוי לא מקבל התראות מצוקה. בזמן הפלגה הוא נשאר דלוק, בערוץ 16.'},
+ lcd:{t:'המסך',d:'שורה עליונה: TX בזמן שידור ו-RX בקליטה, עוצמת השידור (HI 25W או LO 1W), GPS (יש מיקום תקף), DSC (הבקר הדיגיטלי פעיל) והשעה ב-UTC.\nבמרכז: מספר הערוץ ותפקידו, ומדי VOL ו-SQL.\nלמטה: המיקום מה-GPS, ושורת הודעות (למשל DISTRESS SENT).\nהרגל טוב למבחן: לפני כל פעולה מסתכלים במסך — ערוץ, עוצמה ומיקום.'},
+ vol:{t:'VOL — עוצמת השמע',d:'קובע כמה חזק שומעים. אין לו השפעה על עוצמת השידור.\nאם לא שומעים כלום: בודקים קודם את VOL, ואחר כך את SQL.'},
+ sql:{t:'SQL — Squelch',d:'משתיק את רעש הרקע כשאף אחד לא משדר.\nהכיוון הנכון: מורידים עד ששומעים רחש, ואז מעלים צעד-צעד עד שהוא בדיוק נעלם.\nSquelch גבוה מדי משתיק גם שידורים חלשים ורחוקים.'},
+ c16:{t:'המקש 16',d:'מחזיר מיד לערוץ 16, מכל מצב ומכל תפריט.\nערוץ 16 הוא ערוץ המצוקה, הבטיחות והקריאה. בו מאזינים בהפלגה, ובו משדרים בקול MAYDAY, PAN PAN ו-SECURITE.\nבסיום כל שיחה בערוץ עבודה חוזרים ל-16.'},
+ updn:{t:'החיצים ▲▼',d:'במסך הראשי: מעבר בין ערוצים. בתפריט: מעבר בין השורות.\nאפשר גם להקליד מספר ערוץ בספרות. ערוץ 70 לא ניתן לבחירה, כי הוא שמור ל-DSC.'},
+ hilo:{t:'HI/LO — עוצמת השידור',d:'מחליף בין 25W (טווח מרבי) ל-1W (טווח קצר).\nהכלל: משדרים בעוצמה הנמוכה ביותר שמספיקה. בתוך מרינה ולכלי קרוב — 1W. למצוקה, לדחיפות ולטווח ארוך — 25W.\nלחצן DISTRESS מעביר ל-25W אוטומטית.'},
+ menu:{t:'MENU — תפריט ה-DSC',d:'פותח את תפריט הקריאות הדיגיטליות:\nINDIVIDUAL CALL — קריאה לכלי אחד לפי MMSI.\nALL SHIPS CALL — קריאה לכולם, בעדיפות SAFETY או URGENCY.\nCALL LOG — הקריאות שהתקבלו.\nקריאת מצוקה אינה בתפריט. היא נשלחת רק בלחצן DISTRESS האדום.'},
+ ent:{t:'ENT — אישור',d:'מאשר בחירה בתפריט, ושולח את הקריאה במסך האישור.\nבקריאה שגרתית נכנסת: ENT שולח אישור (ACK) ומעביר לערוץ העבודה.'},
+ clr:{t:'CLR — ביטול וחזרה',d:'חוזר צעד אחורה בתפריט, ומוחק ספרה בהקלדת MMSI.\nכשהתראת מצוקה פעילה: CLR במסך הראשי פותח את ביטול ההתראה.'},
+ num:{t:'מקשי הספרות',d:'משמשים להקלדת MMSI (תמיד 9 ספרות) בקריאת INDIVIDUAL, ולהקלדה ישירה של מספר ערוץ במסך הראשי.\nלפני ENT בודקים את ה-MMSI ספרה-ספרה. ספרה שגויה אחת היא קריאה לכלי אחר.'},
+ ptt:{t:'PTT — לחצן השידור',d:'לוחצים ומחזיקים כדי לדבר, ומשחררים כדי להקשיב. כל עוד אתה לוחץ, אינך שומע אף אחד.\nלפני הלחיצה: מקשיבים שהערוץ פנוי, מוודאים ערוץ ועוצמה, ויודעים מה עומדים לומר.\nמדברים לאט וברור, ומשחררים מיד בסיום.'},
+ dcover:{t:'המכסה של לחצן DISTRESS',d:'מכסה קפיצי שמונע לחיצה בטעות. כדי לשלוח התראת מצוקה חייבים קודם להרים אותו.\nלא מרימים אותו אלא אם החלטת לשלוח התראת מצוקה.'},
+ dbtn:{t:'לחצן DISTRESS',d:'שולח התראת מצוקה דיגיטלית בערוץ 70 לכל התחנות בטווח: MMSI, מיקום, שעה וסוג המצוקה.\nלחיצה קצרה: בחירת סוג המצוקה. לחיצה ארוכה של 5 שניות: שליחה.\nאחרי השליחה המכשיר עובר לערוץ 16 ולעוצמה גבוהה, ומשדר שוב בערך כל 4 דקות עד שתחנת חוף מאשרת.\nמשתמשים בו רק בסכנה חמורה ומיידית לחיים או לכלי. אחריו תמיד בא MAYDAY בקול.'}
+};
+/* ----- exam-format distress questions: the full written answer, built in order ----- */
+const DIG=['ZERO','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE'];
+const NUMW=DIG.concat(['TEN','ELEVEN','TWELVE']);
+const spk=s=>String(s).split('').map(c=>DIG[+c]).join(' ');
+const p3=n=>String(n).padStart(3,'0');
+const sayLat=a=>`${spk(p2(a[0]))} DEGREES ${spk(p2(a[1]))} MINUTES ${a[2]==='N'?'NORTH':'SOUTH'}`;
+const sayLon=o=>`${spk(p3(o[0]))} DEGREES ${spk(p2(o[1]))} MINUTES ${o[2]==='E'?'EAST':'WEST'}`;
+const posTxt=(a,o)=>`${p2(a[0])}°${p2(a[1])}'${a[2]} / ${p3(o[0])}°${p2(o[1])}'${o[2]}`;
+const wdone=id=>e=>e.type==='voice-done'&&e.id===id;
+const A1='היאכטה מצוידת לפי דרישות ה-GMDSS לאזור A1.';
+const EXQ=[
+ {name:'NOGA',mmsi:'428311207',lat:[32,41,'N'],lon:[34,38,'E'],pob:5,crew:'5 אנשי צוות',
+  story:'שריפה פרצה בחדר המנוע והיא מתפשטת. הסקיפר מורה לך להזעיק עזרה מיידית, ומודיע שעדיין לא נוטשים.',
+  nature:'FIRE AND EXPLOSION',wrong:['FLOODING','COLLISION'],msg:'FIRE IN ENGINE ROOM, OUT OF CONTROL',b:['seelonce']},
+ {name:'ALMOG',mmsi:'428560914',lat:[33,2,'N'],lon:[34,51,'E'],pob:6,crew:'2 אנשי צוות ו-4 נוסעים',
+  story:'היאכטה פגעה בחפץ צף, מים חודרים לגוף והמשאבות לא עומדות בקצב. הסקיפר מורה לך להזעיק עזרה מיידית.',
+  nature:'FLOODING',wrong:['GROUNDING','FIRE AND EXPLOSION'],msg:'TAKING WATER FASTER THAN PUMPS, IN DANGER OF SINKING',b:['ack']},
+ {name:'DROR',mmsi:'428207733',lat:[31,48,'N'],lon:[34,29,'E'],pob:3,crew:'3 אנשי צוות',
+  story:'המנוע שבק וההגה ניתק. היאכטה נסחפת ברוח חזקה אל חוף סלעי ועלולה להתנפץ. הסקיפר מורה לך להזעיק עזרה מיידית.',
+  nature:'DISABLED AND ADRIFT',wrong:['GROUNDING','CAPSIZING'],msg:'NO ENGINE, NO STEERING, DRIFTING ONTO ROCKS',b:['feenee']},
+ {name:'SAHAR',mmsi:'428942051',lat:[32,28,'N'],lon:[34,44,'E'],pob:7,crew:'3 אנשי צוות ו-4 נוסעים',
+  story:'היאכטה עלתה על שרטון, וגלי צד מאיימים להפוך אותה. הסקיפר מורה לך להזעיק עזרה מיידית.',
+  nature:'GROUNDING',wrong:['COLLISION','DISABLED AND ADRIFT'],msg:'AGROUND, HEAVY SWELL, IN DANGER OF CAPSIZING',b:['transfer']},
+ {name:'GALIT',mmsi:'428118365',lat:[32,55,'N'],lon:[34,12,'E'],pob:4,crew:'4 אנשי צוות',
+  story:'בלילה התנגשה היאכטה בכלי שיט לא מזוהה. הגוף נפגע והיא בסכנת טביעה. הסקיפר מורה לך להזעיק עזרה מיידית.',
+  nature:'COLLISION',wrong:['GROUNDING','PIRACY'],msg:'COLLIDED WITH UNIDENTIFIED VESSEL, IN DANGER OF SINKING',b:['navtex','epirb']},
+ {name:'TEVA',mmsi:'428675420',lat:[33,10,'N'],lon:[33,57,'E'],pob:8,crew:'8 אנשי צוות',abandon:true,
+  story:'התורן נשבר, אין שליטה ביאכטה והיא עלולה להתהפך. הסקיפר מכריז על נטישה ומורה לך להזעיק עזרה מיידית.',
+  nature:'ABANDONING SHIP',wrong:['CAPSIZING','DISABLED AND ADRIFT'],natWhy:'הסקיפר הכריז על נטישה, ולכן סוג המצוקה הוא ABANDONING SHIP.',msg:'DISMASTED, NO CONTROL, IN DANGER OF CAPSIZING',b:['sart']}
+];
+const EXB={
+ seelonce:()=>({t:'סעיף ב. במהלך תעבורת המצוקה, כמה כלי שיט מנהלים שיחות שגרה בערוץ 16 ומפריעים. איך תורה להם להפסיק?',
+   h:'ההוראה קצרה: מילת המצוקה, למי פונים, הביטוי שמטיל דממת קשר, ומילת סיום.',w:'מי שמפקח על תעבורת המצוקה רשאי להשתיק את הערוץ, כדי שהודעות המצוקה יישמעו.',
+   write:{id:'ex-b',title:'הטלת דממת קשר — ערוץ 16, 25W',lines:['MAYDAY','ALL STATIONS','SEELONCE MAYDAY','OUT'],
+     decoys:[{t:'SEELONCE FEENEE',why:'SEELONCE FEENEE מכריז על סיום המצוקה. כדי להשתיק את הערוץ אומרים SEELONCE MAYDAY.'},{t:'OVER',why:'זו הוראה ולא שאלה. לא מצפים לתשובה, ולכן מסיימים ב-OUT.'}]},done:wdone('ex-b')}),
+ feenee:(n,m)=>({t:'סעיף ב. פעולות ההצלה הסתיימו בהצלחה בשעה 1640 UTC. איך תודיע על סיום מצב המצוקה?',
+   h:'פותחים ב-MAYDAY ופונים לכל התחנות, מזדהים, מוסרים את השעה ואת שם הכלי שהיה במצוקה, ומסיימים בביטוי שמסיים את דממת הקשר.',w:'כל עוד לא הוכרז על סיום, הערוץ שמור לתעבורת המצוקה. ההודעה משחררת אותו לשגרה.',
+   write:{id:'ex-b',title:'סיום מצב המצוקה — ערוץ 16, 25W',lines:['MAYDAY','ALL STATIONS, ALL STATIONS, ALL STATIONS',`THIS IS ${n}, ${n}, ${n}`,`MMSI ${m}`,'ONE SIX FOUR ZERO UTC',n,'SEELONCE FEENEE','OUT'],
+     decoys:[{t:'SEELONCE MAYDAY',why:'SEELONCE MAYDAY מטיל דממת קשר. את סיום המצוקה מכריזים ב-SEELONCE FEENEE.'},{t:'OVER',why:'זו הודעה לכל התחנות, בלי ציפייה לתשובה. מסיימים ב-OUT.'}]},done:wdone('ex-b')}),
+ ack:n=>({t:'סעיף ב. האונייה ATLAS קלטה את הודעת המצוקה שלך. באיזה ערוץ, ואיך, היא תאשר את הקבלה?',
+   h:'האישור ניתן בקול בערוץ 16: מילת המצוקה, שם הכלי שבמצוקה ×3, שם המאשרת ×3, והביטוי שמאשר קבלה.',w:'כלי שיט מאשר הודעת מצוקה בקול, ולא ב-DSC. האישור הדיגיטלי שמור לתחנת החוף.',
+   write:{id:'ex-b',title:'אישור קבלה מהאונייה ATLAS — ערוץ 16, 25W',lines:['MAYDAY',`${n}, ${n}, ${n}`,'THIS IS ATLAS, ATLAS, ATLAS','RECEIVED MAYDAY','OVER'],
+     decoys:[{t:'MAYDAY RELAY, MAYDAY RELAY, MAYDAY RELAY',why:'ATLAS מאשרת קבלה לכלי שבמצוקה. MAYDAY RELAY משמש להעברת המצוקה לתחנות אחרות.'},{t:'SEND DSC ACKNOWLEDGEMENT ON CH 70',why:'כלי שיט לא מאשר התראת מצוקה ב-DSC. האישור ניתן בקול בערוץ 16.'}]},done:wdone('ex-b')}),
+ transfer:()=>({t:'סעיף ב. אינך מסוגל לפקח על תעבורת המצוקה. מי רשאי לפקח במקומך?',quiz:[
+   {t:'אף אחד. רק הכלי שבמצוקה מפקח על התעבורה',why:'אפשר להעביר את הפיקוח לכלי שיט אחר או לתחנת חוף, אם הם בטווח קליטה.'},
+   {t:'כלי שיט אחר או תחנת חוף, אם הם בטווח קליטה',ok:true,why:'נכון. הפיקוח עובר למי שיכול לשמוע את כל הצדדים.'},
+   {t:'כל כלי שיט, גם אם אינו שומע את הכלי שבמצוקה',why:'מי שמפקח חייב להיות בטווח קליטה, אחרת אינו יכול לנהל את התעבורה.'}]}),
+ navtex:()=>({t:'סעיף ב. באיזה אמצעי יכול ה-MRCC להרחיב את מעגל החיפוש וההצלה אל מעבר לטווח ה-VHF?',quiz:[
+   {t:'שידור הודעה על כלי השיט שבמצוקה במכשיר ה-NAVTEX',ok:true,why:'נכון. הודעת NAVTEX מגיעה לכלי שיט הרבה מעבר לטווח ה-VHF.'},
+   {t:'שידור חוזר בערוץ 16 בהספק גבוה יותר',why:'טווח ה-VHF מוגבל לקו הראייה, והגדלת ההספק לא מרחיבה אותו משמעותית.'},
+   {t:'קריאת DSC נוספת בערוץ 70',why:'גם ערוץ 70 הוא VHF, באותו טווח. מעבר לו ה-MRCC משתמש ב-NAVTEX.'}]}),
+ epirb:()=>({t:'הפעלת את ה-EPIRB. מה זמינות מערכת הלוויינים שקולטת אותו?',quiz:[
+   {t:'הקליטה תמיד מיידית, כי הלוויינים קבועים מעל האזור',why:'לפי חומר הקורס: המשואה משדרת ללווייני LEOSAR, שנעים במסלול נמוך ועוברים מעל כל נקודה בערך פעם בשעה וחצי.'},
+   {t:'הלוויין עובר מעל כל נקודה פעם ביממה',why:'לפי חומר הקורס: לווייני LEOSAR עוברים מעל כל נקודה בערך פעם בשעה וחצי.'},
+   {t:'המשואה משדרת ללווייני LEOSAR, שעוברים מעל כל נקודה בכדור הארץ בערך פעם בשעה וחצי',ok:true,why:'נכון, לפי חומר הקורס.'}]}),
+ sart:()=>({t:'סעיף ב. אתה באסדת ההצלה אחרי הנטישה. ה-SART מתחיל לנצנץ ולהשמיע צפצופים. מה הסיבה, ואיך מגיבים?',quiz:[
+   {t:'הסוללה עומדת להיגמר. מכבים אותו כדי לחסוך',why:'הנצנוץ והצפצוף אומרים שה-SART קלט מכ"ם של כלי שיט קרוב. לא מכבים אותו.'},
+   {t:'הוא קלט מכ"ם X-BAND של כלי שיט קרוב. מתצפתים, קוראים ב-VHF הנייד, ואם רואים כלי שיט מפעילים פירוטכניקה',ok:true,why:'נכון. ה-SART מגיב רק כשמכ"ם סורק אותו, כלומר יש כלי שיט בסביבה.'},
+   {t:'זו בדיקה עצמית תקופתית. אין צורך לעשות דבר',why:'הנצנוץ והצפצוף אומרים שמכ"ם של כלי שיט קרוב סורק את ה-SART. זה הזמן לתצפת ולקרוא בקשר.'}]}),
+ arcs:()=>({t:'סעיף ב. על מסך המכ"ם שלך מופיעות 12 קשתות על ציר אחד, מהמרכז כלפי היקף המסך. מה המשמעות, ומה תעשה?',quiz:[
+   {t:'משיב SART פועל בקרבת מקום. הקשת הקרובה ביותר למרכז המסך מסמנת את מקומו. מתקדמים לכיוונו, מתצפתים ומנסים ליצור קשר',ok:true,why:'נכון. ככל הנראה אלה הניצולים שנטשו את הכלי.'},
+   {t:'הפרעה ממכ"ם של אונייה אחרת. מתעלמים',why:'12 סימנים על ציר אחד הם החתימה של משיב SART, ולא הפרעה.'},
+   {t:'התראת DSC שהתקבלה. בודקים את יומן הקריאות',why:'התראת DSC מוצגת במכשיר הקשר, לא במכ"ם. 12 הקשתות הן החתימה של משיב SART.'}]})
+};
+const EXBRIEF=['במבחן כותבים את הנוהל בסדר קבוע: EPIRB, התראת DSC בערוץ 70, קריאת מצוקה בערוץ 16, הודעת מצוקה בערוץ 16, ומה עושים בנטישה.','אסוף מהשאלה חמישה נתונים: שם הכלי, MMSI, מיקום, מהות המצוקה ומספר האנשים. צוות ונוסעים מחברים.','MMSI ומיקום נכתבים במילים, ספרה-ספרה. קו אורך נכתב בשלוש ספרות.','סעיף ב משתנה משאלה לשאלה: דממת קשר, סיום מצוקה, אישור קבלה, SART, EPIRB או NAVTEX.'];
+const EXTIPS=['סדר התשובה: EPIRB, התראת DSC בערוץ 70 ב-25W, קריאת מצוקה ואז הודעת מצוקה בערוץ 16 ב-25W.','בקריאה: MAYDAY ×3, שם הכלי ×3 ו-MMSI. בהודעה: MAYDAY, שם, מיקום, מהות המצוקה, REQUIRE IMMEDIATE ASSISTANCE, מספר האנשים, OVER.','בנטישה: EPIRB במים וקשור לאסדה, SART מופעל ותלוי גבוה, VHF נייד על ערוץ 16.','SEELONCE MAYDAY מטיל דממת קשר, SEELONCE FEENEE מסיים את המצוקה, PRUDONCE מתיר תעבורה מוגבלת.'];
+const D_PP={t:'PAN PAN, PAN PAN, PAN PAN',why:'יש סכנה חמורה ומיידית, ולכן זו מצוקה: MAYDAY.'};
+function examDef(i){
+  i=i%(EXQ.length+1);
+  const base={id:'exam',paper:true,title:`שאלת מצוקה ${i+1}`,brief:EXBRIEF,tips:EXTIPS};
+  if(i===EXQ.length){
+    const me='LIVNAT',mm=spk('428733092'),la=[32,20,'N'],lo=[34,5,'E'];
+    return Object.assign(base,{sit:`אתה מפליג ביאכטה ${me} (MMSI 428733092), במיקום ${posTxt(la,lo)}. בשעה 0915 UTC אתה שומע בערוץ 16: "MAYDAY ×3, THIS IS KESHET ×3, MMSI 428190466, MAYDAY KESHET, 32°31' NORTH, 034°…" — והשידור נקטע. אחרי כמה דקות של האזנה רצופה אין המשך, ואף תחנה לא מגיבה.`,
+     steps:[
+      {t:'סעיף א. מה התגובה הנכונה?',quiz:[
+        {t:'שולח אישור DSC לכלי שבמצוקה',why:'כלי שיט לא מאשר ב-DSC. ומאחר שאף תחנה לא הגיבה, צריך להעביר את המצוקה הלאה.'},
+        {t:'משדר MAYDAY RELAY בערוץ 16, ב-25W',ok:true,why:'נכון. ההודעה נקטעה ואף אחד לא הגיב, ולכן אתה מעביר אותה לכל התחנות.'},
+        {t:'ממשיך להאזין עוד חצי שעה לפני שעושה משהו',why:'כבר האזנת כמה דקות בלי המשך ובלי תגובה. עכשיו מעבירים את המצוקה הלאה.'}]},
+      {t:'כתוב את הודעת ה-MAYDAY RELAY.',h:'פתיחה ×3, הנמען ×3, הזיהוי והמיקום שלך, מתי קיבלת, ואז ציטוט מדויק של מה ששמעת בין QUOTE ל-UNQUOTE. בסוף: אין מידע נוסף, ובקשה מכלי השיט בסביבה.',w:'מצטטים בדיוק את מה שנשמע, גם אם ההודעה קטועה. לא משלימים פרטים מהדמיון.',
+       write:{id:'ex-relay',title:'MAYDAY RELAY — ערוץ 16, 25W',
+        lines:['MAYDAY RELAY, MAYDAY RELAY, MAYDAY RELAY','ALL STATIONS, ALL STATIONS, ALL STATIONS',`THIS IS ${me}, ${me}, ${me}`,`MMSI ${mm}`,sayLat(la),sayLon(lo),'FOLLOWING RECEIVED MAYDAY AT ZERO NINE ONE FIVE UTC','QUOTE','MAYDAY, MAYDAY, MAYDAY, THIS IS KESHET, KESHET, KESHET',`MMSI ${spk('428190466')}`,'MAYDAY KESHET, THREE TWO DEGREES THREE ONE MINUTES NORTH, ZERO THREE FOUR DEGREES','UNQUOTE','NO FURTHER INFORMATION','VESSELS IN VICINITY PLEASE SEARCH AND ASSIST','OVER'],
+        decoys:[{t:'THIS IS KESHET, KESHET, KESHET',why:'אתה המשדר, ולכן מזדהים בשם שלך. השם KESHET מופיע רק בתוך הציטוט.'},{t:'OUT',why:'אתה מצפה לתגובה מכלי שיט בסביבה, ולכן OVER.'}]},done:wdone('ex-relay')},
+      EXB.arcs()
+     ]});
+  }
+  const q=EXQ[i],n=q.name,m=spk(q.mmsi);
+  const nat=[{t:`DISTRESS – ${q.nature} – עדכון שעה ומיקום – שליחה`,ok:true,why:'נכון. בוחרים את סוג המצוקה, מוודאים שעה ומיקום, ושולחים.'}]
+    .concat(q.wrong.map(x=>({t:`DISTRESS – ${x} – עדכון שעה ומיקום – שליחה`,why:q.natWhy||`סוג המצוקה צריך לתאר את מה שקרה בפועל: ${q.nature}.`})));
+  nat.splice(i%3,0,nat.shift());
+  return Object.assign(base,{
+   sit:`אתה מפליג ביאכטה ${n}, MMSI ${q.mmsi}. ${q.story} המיקום: ${posTxt(q.lat,q.lon)}. על הסיפון ${q.crew}. ${A1}`,
+   steps:[
+    {t:'סעיף א. מה סדר הפעולות להשגת עזרה מיידית?',h:'ארבע פעולות: המשואה, ההתראה הדיגיטלית, הקריאה בקול, ואז ההודעה בקול.',w:'ה-EPIRB וה-DSC מעבירים זהות ומיקום גם אם לא תספיק לדבר. הקול בא אחריהם ומוסיף את הפרטים.',
+     write:{id:'ex-order',title:'סדר הפעולות',lines:['ACTIVATE EPIRB A.S.A.P','SEND DISTRESS ALERT ON DSC CH 70, 25W','SEND DISTRESS CALL ON VHF CH 16, 25W, SET SQUELCH','SEND DISTRESS MESSAGE ON VHF CH 16, 25W'],
+      decoys:[{t:'SEND DISTRESS ALERT ON DSC CH 16',why:'התראת DSC משודרת בערוץ 70. ערוץ 16 הוא ערוץ הקול.'},{t:'WAIT FOR ACKNOWLEDGEMENT BEFORE ANY VOICE CALL',why:'לא מחכים לאישור כדי לדבר. אחרי ההתראה משדרים את קריאת המצוקה בקול.'}]},done:wdone('ex-order')},
+    {t:'מה בוחרים בבקר ה-DSC לפני שליחת ההתראה?',quiz:nat},
+    {t:'כתוב את קריאת המצוקה (DISTRESS CALL).',h:'מילת המצוקה שלוש פעמים, שם הכלי שלוש פעמים, וה-MMSI ספרה-ספרה.',w:'הקריאה עונה על שאלה אחת: מי במצוקה. הפרטים באים בהודעה שאחריה.',
+     write:{id:'ex-call',title:'DISTRESS CALL — ערוץ 16, 25W',lines:['MAYDAY, MAYDAY, MAYDAY',`THIS IS ${n}, ${n}, ${n}`,`MMSI ${m}`],
+      decoys:[D_PP,{t:`THIS IS ${n}`,why:'בקריאה אומרים את שם הכלי שלוש פעמים.'},{t:`MMSI ${q.mmsi}`,why:'בתשובה כותבים את ה-MMSI במילים, ספרה-ספרה.'}]},done:wdone('ex-call')},
+    {t:'כתוב את הודעת המצוקה (DISTRESS MESSAGE).',h:'MAYDAY, שם הכלי, קו הרוחב, קו האורך, מהות המצוקה, העזרה הנדרשת, מספר האנשים, ומילת הסיום.',w:'ההודעה עונה על מה שהמחלצים צריכים: איפה, מה קרה, מה דרוש, וכמה אנשים לחפש.',
+     write:{id:'ex-msg',title:'DISTRESS MESSAGE — ערוץ 16, 25W',lines:['MAYDAY',n,sayLat(q.lat),sayLon(q.lon),q.msg,'REQUIRE IMMEDIATE ASSISTANCE',`${NUMW[q.pob]} PERSONS ON BOARD`+(q.abandon?', ABANDONING TO LIFE RAFT':''),'OVER'],
+      decoys:[{t:`${q.lat[0]} DEGREES ${q.lat[1]} MINUTES NORTH`,why:'את המיקום כותבים במילים, ספרה-ספרה: '+sayLat(q.lat)+'.'},{t:'OUT',why:'אתה מצפה לתשובה, ולכן מסיימים ב-OVER.'}]},done:wdone('ex-msg')},
+    {t:q.abandon?'נוטשים. מה עושים עם ציוד הקשר והאיתור?':'מה עושים עם ציוד הקשר והאיתור אם תידרש נטישה?',quiz:[
+      {t:'משאירים את ה-EPIRB על היאכטה כדי שיסמן את מקומה, ולוקחים לאסדה רק VHF נייד',why:'ה-EPIRB נשאר עם הניצולים: במים, קשור לאסדת ההצלה. את הניצולים מחפשים, לא את היאכטה.'},
+      {t:'EPIRB במים, קשור לאסדת ההצלה. SART מופעל ותלוי גבוה ככל האפשר. VHF נייד על ערוץ 16 בהספק מרבי, עם סוללות רזרביות',ok:true,why:'נכון. שלושת המכשירים עוברים לאסדה, וכל אחד מוצב כך שיעבוד הכי טוב.'},
+      {t:'SART מונח על רצפת האסדה כדי שלא יירטב, ו-VHF נייד מכוון לערוץ 70',why:'את ה-SART תולים גבוה כדי להגדיל את טווח הגילוי, ובערוץ 70 אי אפשר לדבר. ה-VHF הנייד מכוון לערוץ 16.'}]}
+   ].concat(q.b.map(k=>EXB[k](n,m)))});
+}
+
+SC.forEach(d=>{d.brief=BRIEF[d.id];(WHY[d.id]||[]).forEach((w,i)=>{if(w&&d.steps[i])d.steps[i].w=w;});});
+function clearSel(){document.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));}
+function showExpl(id,el){audio();tone(1500,.03,.03);X=EXPL[id];clearSel();if(el)el.classList.add('sel');renderCoach();render();}
+function explKey(k){return /^\d$/.test(k)?'num':k.startsWith('vol')?'vol':k.startsWith('sql')?'sql':(k==='up'||k==='dn')?'updn':k;}
 
 /* ================= scenario engine ================= */
 function cur(){return S?S.def.steps[S.i]:null;}
@@ -796,15 +1351,26 @@ function enterStep(){
   if(st.done&&!st.quiz&&st.done({type:'state'},R))advance(st.ok);
 }
 function renderCoach(){
-  const q=$('c-quiz'),h=$('c-hint'),say=$('c-say');q.innerHTML='';h.innerHTML='';say.hidden=true;
+  const q=$('c-quiz'),h=$('c-hint'),say=$('c-say'),wy=$('c-why');q.innerHTML='';h.innerHTML='';say.hidden=true;wy.hidden=true;wy.open=false;
   if(!S){
+    $('c-no').textContent='';$('bar').style.width='0';
+    const tg=document.createElement('button');
+    tg.textContent=explain?'עבור לתפעול חופשי של המכשיר':'עבור למצב הסבר: מה עושה כל מקש';
+    tg.onclick=()=>{explain=!explain;X=null;clearSel();fb('','ok');renderCoach();render();};
+    if(explain){
+      $('c-sit').textContent='הכר את המכשיר: הקש על כל מקש, על לחצן או על המסך, וקרא מה הוא עושה ומתי משתמשים בו.';
+      $('c-tx').textContent=X?X.t:'הקש על רכיב במכשיר';
+      h.textContent=X?X.d:'במצב הזה המקשים לא מפעילים את המכשיר. הם רק מציגים הסבר.';
+      h.appendChild(document.createTextNode('\n\n'));h.appendChild(tg);return;
+    }
     $('c-sit').textContent='מצב חופשי: תפעל את המכשיר כרצונך. אפשר לדמות קריאות נכנסות.';
-    $('c-no').textContent='';$('c-tx').textContent='קריאות נכנסות';$('bar').style.width='0';
+    $('c-tx').textContent='קריאות נכנסות';
     [['קריאת מצוקה נכנסת',()=>incoming({type:'distress',mmsi:'428765432',nature:'SINKING',pos:"32°58'N 034°48'E"})],
      ['שיחה שגרתית נכנסת',()=>incoming({type:'individual',mmsi:OTHER.mmsi,ch:72})]].forEach(([t,f])=>{
       const b=document.createElement('button');b.textContent=t;
       b.onclick=()=>{audio();if(!R.on){fb('המכשיר כבוי — הפעל אותו קודם.','err');return;}fb('','ok');later(f,1200,true);};
       q.appendChild(b);});
+    q.appendChild(tg);
     return;
   }
   const n=S.def.steps.length,st=cur();
@@ -818,19 +1384,35 @@ function renderCoach(){
     const b=document.createElement('button');b.textContent=o.t;
     b.onclick=()=>{audio();if(o.ok)advance(o.why);else mistake(o.why);};
     q.appendChild(b);});
+  if(st.write){
+    const b=document.createElement('button');b.textContent='כתוב את התשובה';b.style.borderColor='var(--amber)';
+    b.onclick=()=>{audio();openComposer(st.write,true);};q.appendChild(b);
+  }
   if(st.h){
     if(practice||S.flags.hint)h.textContent=st.h;
     else{const b=document.createElement('button');b.textContent='הצג רמז (מוריד חצי נקודה)';b.onclick=()=>{S.flags.hint=true;S.hints++;renderCoach();};h.appendChild(b);}
   }
+  if(practice&&st.w){wy.hidden=false;$('c-why-tx').textContent=st.w;}
 }
-function startScenario(def){
+function showBrief(){
+  const d=S.def;$('bf-sit').textContent=d.sit;
+  const ol=$('bf-list');ol.innerHTML='';d.brief.forEach(t=>{const li=document.createElement('li');li.textContent=t;ol.appendChild(li);});
+  $('bf-go').textContent=S.started?'המשך':'התחל את התרחיש';$('brief').hidden=false;
+}
+function startScenario(def,exp){
   audio();
   resetRadio(def?def.init:null);
-  S=def?{def,i:0,score:0,errs:0,hints:0,flags:{}}:null;
-  $('home').hidden=true;$('sim').hidden=false;$('result').hidden=true;
-  $('sc-ttl').textContent=def?def.title:'מצב חופשי';
+  explain=!def&&!!exp;X=null;clearSel();
+  S=def?{def,i:0,score:0,errs:0,hints:0,flags:{},started:false}:null;
+  $('home').hidden=true;$('sim').hidden=false;$('result').hidden=true;$('brief').hidden=true;
+  $('sc-ttl').textContent=def?def.title:explain?'הכר את המכשיר':'מצב חופשי';
+  document.querySelector('.radio').hidden=!!(def&&def.paper);
+  const hasBrief=!!(S&&practice&&def.brief);
+  $('brief-btn').hidden=!hasBrief;
   fb('','ok');window.scrollTo(0,0);
-  if(S)enterStep();else renderCoach();
+  if(!S)renderCoach();
+  else if(hasBrief){renderCoach();showBrief();}
+  else{S.started=true;enterStep();}
   render();
 }
 function finish(){
@@ -847,8 +1429,9 @@ function finish(){
 function goHome(){
   clearT(true);stopAlarm();if(H){clearInterval(H.iv);H=null;}
   if(C.open){C.open=false;$('composer').hidden=true;}
+  explain=false;X=null;clearSel();
   R.on=false;R.tx=false;R.mode='off';S=null;render();
-  $('sim').hidden=true;$('result').hidden=true;$('home').hidden=false;drawHome();window.scrollTo(0,0);
+  $('sim').hidden=true;$('result').hidden=true;$('brief').hidden=true;$('guide').hidden=true;$('home').hidden=false;drawHome();window.scrollTo(0,0);
 }
 function loadBest(){try{return JSON.parse(localStorage.getItem('vhfsim.best'))||{};}catch(_){return {};}}
 function drawHome(){
@@ -858,6 +1441,12 @@ function drawHome(){
     b.innerHTML=`<div class="sc-top"><span class="tag ${d.cls}">${d.tag}</span>${best[d.id]!=null?`<span class="best">שיא: ${best[d.id]}%</span>`:''}</div><div class="sc-title">${d.title}</div><div class="sc-desc">${d.desc}</div>`;
     b.onclick=()=>startScenario(d);list.appendChild(b);
   });
+  let xi=0;try{xi=+localStorage.getItem('vhfsim.exq')||0;}catch(_){}
+  const nx=EXQ.length+1;xi%=nx;
+  const x=document.createElement('button');x.className='sc';
+  x.innerHTML=`<div class="sc-top"><span class="tag t-d">מבחן</span>${best.exam!=null?`<span class="best">שיא: ${best.exam}%</span>`:''}</div><div class="sc-title">שאלת מצוקה בפורמט המבחן</div><div class="sc-desc">שאלה ${xi+1} מתוך ${nx}. כותבים את כל הנוהל לפי הסדר, כמו בתשובה במבחן</div>`;
+  x.onclick=()=>{try{localStorage.setItem('vhfsim.exq',String((xi+1)%nx));}catch(_){}startScenario(examDef(xi));};
+  list.insertBefore(x,list.firstChild);
   const f=document.createElement('button');f.className='sc';
   f.innerHTML='<div class="sc-top"><span class="tag t-b">FREE</span></div><div class="sc-title">מצב חופשי</div><div class="sc-desc">תפעול חופשי של המכשיר, בלי תרחיש ובלי ציון</div>';
   f.onclick=()=>startScenario(null);list.appendChild(f);
@@ -866,9 +1455,15 @@ function drawHome(){
 function setMode(p){practice=p;try{localStorage.setItem('vhfsim.mode',p?'p':'e');}catch(_){}drawHome();}
 
 /* ================= wiring ================= */
-document.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>key(b.dataset.k)));
-$('pwr').addEventListener('click',power);
-$('dcover').addEventListener('click',()=>{audio();R.cover=!R.cover;tone(300,.05,.05,'sine');emit({type:'cover'});});
+document.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>explain?showExpl(explKey(b.dataset.k),b):key(b.dataset.k)));
+$('pwr').addEventListener('click',()=>explain?showExpl('pwr',$('pwr')):power());
+$('lcd').addEventListener('click',()=>{if(explain)showExpl('lcd',null);});
+$('dcover').addEventListener('click',()=>{audio();R.cover=!R.cover;tone(300,.05,.05,'sine');if(explain){showExpl('dcover',$('dcover'));return;}emit({type:'cover'});});
+$('bf-go').onclick=()=>{$('brief').hidden=true;if(S&&!S.started){S.started=true;enterStep();}};
+$('brief-btn').onclick=()=>{if(S&&S.def.brief&&cur())showBrief();};
+$('go-guide').onclick=()=>{$('home').hidden=true;$('guide').hidden=false;window.scrollTo(0,0);};
+$('g-back').onclick=()=>{$('guide').hidden=true;$('home').hidden=false;window.scrollTo(0,0);};
+$('go-explain').onclick=()=>startScenario(null,true);
 const db=$('dbtn'),pt=$('ptt');
 db.addEventListener('pointerdown',dDown);
 ['pointerup','pointercancel'].forEach(t=>{db.addEventListener(t,dUp);pt.addEventListener(t,pttUp);});
@@ -881,14 +1476,19 @@ $('rs-again').onclick=()=>startScenario(S.def);
 $('snd').onclick=()=>{muted=!muted;audio();if(master)master.gain.value=muted?0:1;$('snd').textContent='צליל: '+(muted?'כבוי':'פועל');};
 $('m-prac').onclick=()=>setMode(true);$('m-exam').onclick=()=>setMode(false);
 document.addEventListener('keydown',e=>{
-  if($('sim').hidden||C.open||!$('result').hidden||e.target.closest('button'))return;
+  if($('sim').hidden||C.open||explain||!$('result').hidden||!$('brief').hidden||e.target.closest('button'))return;
   const m={Enter:'ent',Escape:'clr',Backspace:'clr',ArrowUp:'up',ArrowDown:'dn'};
   const k=/^\d$/.test(e.key)?e.key:m[e.key];
   if(k){e.preventDefault();key(k);}
 });
 setInterval(()=>{if(R.on&&!H&&$('composer').hidden&&!$('sim').hidden)render();},20000);
 try{practice=localStorage.getItem('vhfsim.mode')!=='e';}catch(_){}
+$('g-go').onclick=tryCode;
+$('g-code').addEventListener('keydown',e=>{if(e.key==='Enter')tryCode();});
+$('logout').hidden=!ACCESS_ON;
+$('logout').onclick=()=>{try{localStorage.removeItem('vhfsim.access');}catch(_){}$('home').hidden=true;$('gate').hidden=false;window.scrollTo(0,0);};
 drawHome();
+if(hasAccess())$('home').hidden=false;else $('gate').hidden=false;
 </script>
 </body>
 </html>
