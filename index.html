@@ -1173,15 +1173,29 @@ function render(){
 /* ================= voice composer ================= */
 const C={open:false};
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+/* wrong wordings of a voice message: the correct lines with one line swapped for a decoy */
+function wrongAlts(v,lines){
+  return (v.decoys||[]).slice(0,2).map(d=>{
+    const at=/^(OUT|OVER)$/.test(d.t)?lines.length-1:0,l=lines.slice();l[at]=d.t;return {lines:l,why:d.why,at};});
+}
+/* text lines for the wrong options of a message, each marked as wrong */
+function wrongText(v,lines,written,pad){
+  const out=[];
+  if(written)(v.decoys||[]).forEach(d=>out.push(pad+'✗ לא שייך לתשובה: '+d.t+(d.why?' — '+d.why:'')));
+  else wrongAlts(v,lines).forEach(a=>{
+    out.push('',pad+'✗ ניסוח שגוי:');
+    a.lines.forEach((t,i)=>out.push(pad+(i===a.at?'✗ '+t+'   <- השורה השגויה':'  '+t)));
+    if(a.why)out.push(pad+'  למה שגוי: '+a.why);
+  });
+  return out;
+}
 function openComposer(v,written){
   C.open=true;C.v=v;C.lines=v.lines.map(l=>typeof l==='function'?l():l);C.i=0;C.msg='';
   C.pool=shuffle(C.lines.map(t=>({t})).concat((v.decoys||[]).map(d=>({t:d.t,why:d.why,decoy:true}))));
   C.written=!!written;C.mode='build';C.alts=null;
   if(!written){
     /* full-message alternatives: the correct wording, and one wrong wording per decoy */
-    const n=C.lines.length;
-    C.alts=shuffle([{lines:C.lines,ok:true}].concat((v.decoys||[]).slice(0,2).map(d=>{
-      const at=/^(OUT|OVER)$/.test(d.t)?n-1:0,l=C.lines.slice();l[at]=d.t;return {lines:l,why:d.why,at};})));
+    C.alts=shuffle([{lines:C.lines,ok:true}].concat(wrongAlts(v,C.lines)));
     let m='pick';try{m=localStorage.getItem('vhfsim.cpmode')||'pick';}catch(_){}
     C.mode=C.alts.length>1&&m!=='build'?'pick':'build';
   }
@@ -1266,7 +1280,14 @@ function saveText(name,text,msgEl){
   setTimeout(()=>URL.revokeObjectURL(url),2000);
   msgEl.textContent='הקובץ נשמר בתיקיית ההורדות.';
 }
-function composerText(){return C.v.title+'\n'+C.lines.join('\n')+siteFoot();}
+function composerText(){
+  const st=S&&S.def?cur():null,out=[C.v.title];
+  if(st){if(S.def.sit)out.push('המצב: '+S.def.sit);out.push((C.written?'השאלה: ':'המשימה: ')+st.t);}
+  out.push('','✓ '+(C.written?'התשובה הנכונה:':'הניסוח הנכון:'));
+  C.lines.forEach(t=>out.push('  '+t));
+  wrongText(C.v,C.lines,C.written,'').forEach(t=>out.push(t));
+  return out.join('\n')+siteFoot();
+}
 /* The full solution as text. Every question is shown with all its options and the correct one marked.
    mine=true adds what the user actually chose and where they went wrong. */
 function solutionText(def,mine){
@@ -1276,14 +1297,17 @@ function solutionText(def,mine){
     const v=st.write||st.voice;
     out.push(`${i+1}. ${st.t}`);
     if(v){
-      out.push('   '+v.title+':');
-      v.lines.forEach(l=>out.push('   '+(typeof l==='function'?l():l)));
+      const vl=v.lines.map(l=>typeof l==='function'?l():l);
+      out.push('   ✓ '+v.title+(st.write?', התשובה הנכונה:':', הניסוח הנכון:'));
+      vl.forEach(l=>out.push('     '+l));
+      wrongText(v,vl,!!st.write,'   ').forEach(t=>out.push(t));
+      out.push('');
       if(mine){
         (st.errMsgs||[]).forEach(m=>out.push('   ✗ הטעות שלי: '+m));
         const cp=[...new Set((st.cpicks||[]).map(([want,got])=>`במקום "${want}" בחרתי "${got}"`))];
         if(cp.length){out.push('   הטעויות שלי בהודעה:');cp.forEach(t=>out.push('   ✗ '+t));}
         else out.push('   בלי טעויות בהודעה.');
-      }else (v.decoys||[]).filter(d=>d.why).forEach(d=>out.push(`   - לא שייך להודעה: ${d.t} — ${d.why}`));
+      }
     }else if(st.quiz){
       const picks=st.picks||[],generic=/^לא נכון\. חשוב שוב/;
       st.quiz.forEach(o=>{
