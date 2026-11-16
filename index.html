@@ -136,6 +136,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 .chip{font-family:var(--mono);font-size:.78rem;text-align:left;background:var(--card2);border:1px solid #3b5d73;border-radius:8px;padding:8px 10px}
 .chip:hover{border-color:var(--amber)}
 .chip.bad{animation:shake .3s;border-color:var(--err)}
+.chip.alt{display:block;width:100%;line-height:1.5}
+.chip.alt.out{animation:none;border-color:var(--err);opacity:.7}
+.chip.alt .x{color:var(--err);font-weight:700}
+#cp-mode{margin-bottom:8px}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .cmsg{font-size:.85rem;color:#ffc0b8;min-height:1.3em}
 .row{display:flex;gap:8px;margin-top:10px}
@@ -608,6 +612,10 @@ Y Yankee   Z Zulu</div>
   <div class="sheet">
     <h2 id="cp-ttl"></h2>
     <p id="cp-sub"></p>
+    <div class="seg" id="cp-mode" role="group" aria-label="אופן התרגול" hidden>
+      <button id="cp-m-pick">בחירה בין ניסוחים</button>
+      <button id="cp-m-build">הרכבה שורה אחר שורה</button>
+    </div>
     <div class="script" id="cp-script"></div>
     <div class="pool" id="cp-pool"></div>
     <div class="cmsg" id="cp-msg"></div>
@@ -1166,10 +1174,18 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random
 function openComposer(v,written){
   C.open=true;C.v=v;C.lines=v.lines.map(l=>typeof l==='function'?l():l);C.i=0;C.msg='';
   C.pool=shuffle(C.lines.map(t=>({t})).concat((v.decoys||[]).map(d=>({t:d.t,why:d.why,decoy:true}))));
+  C.written=!!written;C.mode='build';C.alts=null;
+  if(!written){
+    /* full-message alternatives: the correct wording, and one wrong wording per decoy */
+    const n=C.lines.length;
+    C.alts=shuffle([{lines:C.lines,ok:true}].concat((v.decoys||[]).slice(0,2).map(d=>{
+      const at=/^(OUT|OVER)$/.test(d.t)?n-1:0,l=C.lines.slice();l[at]=d.t;return {lines:l,why:d.why,at};})));
+    let m='pick';try{m=localStorage.getItem('vhfsim.cpmode')||'pick';}catch(_){}
+    C.mode=C.alts.length>1&&m!=='build'?'pick':'build';
+  }
   if(!written){R.tx=true;home();}
   render();
   $('cp-ttl').textContent=written?v.title:v.title+' — ערוץ '+R.ch;
-  $('cp-sub').textContent=written?'הקש על חלקי התשובה לפי הסדר שבו כותבים אותם.':'אתה משדר. הקש על חלקי ההודעה לפי הסדר שבו אומרים אותם.';
   $('cp-done').textContent=written?'סיום':'שחרר PTT — סיום שידור';
   drawComposer();$('composer').hidden=false;
 }
@@ -1178,8 +1194,28 @@ function drawComposer(){
   C.lines.slice(0,C.i).forEach(t=>{const d=document.createElement('div');d.textContent=t;sc.appendChild(d);});
   if(C.i<C.lines.length){const d=document.createElement('div');d.className='ph';d.textContent='…';sc.appendChild(d);}
   const pool=$('cp-pool');pool.innerHTML='';
-  const done=C.i>=C.lines.length;
-  if(!done)C.pool.forEach(ch=>{
+  const done=C.i>=C.lines.length,pick=C.mode==='pick';
+  $('cp-mode').hidden=C.written||done||!C.alts||C.alts.length<2;
+  $('cp-m-pick').classList.toggle('on',pick);$('cp-m-build').classList.toggle('on',!pick);
+  $('cp-sub').textContent=C.written?'הקש על חלקי התשובה לפי הסדר שבו כותבים אותם.'
+    :done?'זה הניסוח הנכון. קרא אותו בקול רם, ואז שחרר את ה-PTT.'
+    :pick?'אתה משדר. לפניך כמה ניסוחים של ההודעה. בחר את הניסוח הנכון להקראה.'
+    :'אתה משדר. הקש על חלקי ההודעה לפי הסדר שבו אומרים אותם.';
+  if(!done&&pick)C.alts.forEach(a=>{
+    const b=document.createElement('button');b.className='chip alt'+(a.out?' out':'');b.disabled=!!a.out;
+    a.lines.forEach((t,i)=>{const d=document.createElement('div');d.textContent=t;if(a.out&&i===a.at)d.className='x';b.appendChild(d);});
+    b.onclick=()=>{
+      if(a.ok){C.i=C.lines.length;C.msg='';tone(1200,.04,.04,'sine');}
+      else{
+        a.out=true;C.msg='בניסוח הזה השורה "'+a.lines[a.at]+'" שגויה. '+(a.why||'');
+        {const st=cur();if(st)(st.cpicks=st.cpicks||[]).push([C.lines[a.at],a.lines[a.at]]);}
+        mistake(null);
+      }
+      drawComposer();
+    };
+    pool.appendChild(b);
+  });
+  if(!done&&!pick)C.pool.forEach(ch=>{
     if(ch.used)return;
     const b=document.createElement('button');b.className='chip';b.textContent=ch.t;
     b.onclick=()=>{
@@ -1235,8 +1271,8 @@ function solutionText(def,mine){
       if(mine){
         (st.errMsgs||[]).forEach(m=>out.push('   ✗ הטעות שלי: '+m));
         const cp=[...new Set((st.cpicks||[]).map(([want,got])=>`במקום "${want}" בחרתי "${got}"`))];
-        if(cp.length){out.push('   הטעויות שלי בהרכבה:');cp.forEach(t=>out.push('   ✗ '+t));}
-        else out.push('   הרכבתי נכון בניסיון הראשון.');
+        if(cp.length){out.push('   הטעויות שלי בהודעה:');cp.forEach(t=>out.push('   ✗ '+t));}
+        else out.push('   בלי טעויות בהודעה.');
       }else (v.decoys||[]).filter(d=>d.why).forEach(d=>out.push(`   - לא שייך להודעה: ${d.t} — ${d.why}`));
     }else if(st.quiz){
       const picks=st.picks||[],generic=/^לא נכון\. חשוב שוב/;
@@ -1935,6 +1971,8 @@ $('tp-close').onclick=()=>{$('topics').hidden=true;};
 $('cp-sh').onclick=()=>shareText(C.v.title,composerText(),$('cp-ok'));
 $('cp-cp').onclick=()=>copyText(composerText(),$('cp-ok'));
 $('cp-dl').onclick=()=>saveText(C.v.title,composerText(),$('cp-ok'));
+function cpMode(m){if(!C.open||C.written)return;C.mode=m;C.i=0;C.msg='';C.pool.forEach(c=>c.used=false);try{localStorage.setItem('vhfsim.cpmode',m);}catch(_){}drawComposer();}
+$('cp-m-pick').onclick=()=>cpMode('pick');$('cp-m-build').onclick=()=>cpMode('build');
 $('rs-m-mine').onclick=()=>drawSol(true);$('rs-m-all').onclick=()=>drawSol(false);
 $('rs-sh').onclick=()=>shareText(S.def.title,S.sol+siteFoot(),$('rs-ok'));
 $('rs-cp').onclick=()=>copyText(S.sol+siteFoot(),$('rs-ok'));
