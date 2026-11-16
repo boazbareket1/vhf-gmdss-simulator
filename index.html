@@ -137,6 +137,15 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 .score.pass{color:var(--ok)}.score.fail{color:var(--err)}
 .tips{margin:8px 0 0;padding:0 18px 0 0;font-size:.9rem}.tips li{margin-bottom:5px}
 
+/* ---------- save / share ---------- */
+.sharerow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.sharerow span{font-size:.82rem;color:var(--mute)}
+.sbtn{font-size:.85rem;font-weight:600;border:1px solid #3b5d73;border-radius:8px;padding:7px 12px;background:var(--card2);color:var(--ink)}
+.sbtn:hover{border-color:var(--amber)}
+.okmsg{font-size:.82rem;color:#9bf0c8;min-height:1.2em;margin-top:4px}
+.sol{font-family:var(--mono);font-size:.76rem;background:#0a121a;border:1px solid var(--line);border-radius:10px;padding:8px 10px;max-height:38vh;overflow:auto;margin-top:6px;color:#cfe3f1}
+.sol div{unicode-bidi:plaintext;text-align:start;white-space:pre-wrap;min-height:.7em}
+
 /* ---------- access gate ---------- */
 .gatebox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px;max-width:420px}
 .gatebox label{font-size:.85rem;color:var(--mute);font-weight:600}
@@ -555,6 +564,13 @@ Y Yankee   Z Zulu</div>
     <div class="script" id="cp-script"></div>
     <div class="pool" id="cp-pool"></div>
     <div class="cmsg" id="cp-msg"></div>
+    <div class="sharerow" id="cp-share" hidden>
+      <span>התשובה הנכונה:</span>
+      <button class="sbtn" id="cp-sh">שתף</button>
+      <button class="sbtn" id="cp-cp">העתק</button>
+      <button class="sbtn" id="cp-dl">שמור כקובץ</button>
+    </div>
+    <div class="okmsg" id="cp-ok"></div>
     <div class="row">
       <button class="btn sec" id="cp-cancel">ביטול</button>
       <button class="btn" id="cp-done" hidden>שחרר PTT — סיום שידור</button>
@@ -590,6 +606,14 @@ Y Yankee   Z Zulu</div>
     <p id="rs-sum"></p>
     <h2 style="font-size:.95rem" id="rs-tips-h">מה לזכור למבחן</h2>
     <ul class="tips" id="rs-tips"></ul>
+    <details class="why" id="rs-sol"><summary>הפתרון המלא</summary><div class="sol" id="rs-sol-tx"></div></details>
+    <div class="sharerow">
+      <span>הפתרון המלא:</span>
+      <button class="sbtn" id="rs-sh">שתף</button>
+      <button class="sbtn" id="rs-cp">העתק</button>
+      <button class="sbtn" id="rs-dl">שמור כקובץ</button>
+    </div>
+    <div class="okmsg" id="rs-ok"></div>
     <div class="row">
       <button class="btn sec" id="rs-again">שוב</button>
       <button class="btn" id="rs-home">לרשימת התרחישים</button>
@@ -958,7 +982,44 @@ function drawComposer(){
     pool.appendChild(b);
   });
   $('cp-msg').textContent=C.msg;
-  $('cp-done').hidden=!done;
+  $('cp-done').hidden=!done;$('cp-share').hidden=!done;$('cp-ok').textContent='';
+}
+/* ----- save / share the correct answer ----- */
+function siteFoot(){return '\n\n— מתוך סימולטור VHF-DSC לתרגול GMDSS'+(/^https?:/.test(location.protocol)?'\n'+location.origin+location.pathname:'');}
+async function copyText(text,msgEl){
+  let ok=false;
+  try{await navigator.clipboard.writeText(text);ok=true;}
+  catch(_){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();try{ok=document.execCommand('copy');}catch(_){}ta.remove();
+  }
+  msgEl.textContent=ok?'הועתק. אפשר להדביק בכל מקום.':'ההעתקה לא הצליחה. נסה "שמור כקובץ".';
+}
+async function shareText(title,text,msgEl){
+  if(navigator.share){
+    try{await navigator.share({title,text});return;}
+    catch(e){if(e&&e.name==='AbortError')return;}
+  }
+  copyText(text,msgEl);
+}
+function saveText(name,text,msgEl){
+  const a=document.createElement('a'),url=URL.createObjectURL(new Blob(['﻿'+text],{type:'text/plain;charset=utf-8'}));
+  a.href=url;a.download=name.replace(/[\\/:*?"<>|]/g,' ').trim()+'.txt';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  msgEl.textContent='הקובץ נשמר בתיקיית ההורדות.';
+}
+function composerText(){return C.v.title+'\n'+C.lines.join('\n')+siteFoot();}
+function solutionText(def){
+  const out=[def.title,def.sit,''];
+  def.steps.forEach((st,i)=>{
+    const v=st.write||st.voice;
+    out.push(`${i+1}. ${st.t}`);
+    if(v){out.push(v.title+':');v.lines.forEach(l=>out.push('   '+(typeof l==='function'?l():l)));}
+    else if(st.quiz){out.push('   תשובה: '+st.quiz.find(o=>o.ok).t);if(st.exp)out.push('   '+st.exp);}
+    else if(st.h)out.push('   '+st.h);
+    out.push('');
+  });
+  return out.join('\n').trim();
 }
 function closeComposer(done){
   const v=C.v;C.open=false;$('composer').hidden=true;R.tx=false;tone(500,.05,.04,'sine');
@@ -1537,6 +1598,9 @@ function finish(){
   $('rs-sum').textContent=(pass?'עברת. ':'עוד לא — ציון עובר הוא 80%. ')+`טעויות: ${S.errs}`+(practice?'':` · רמזים: ${S.hints}`)+'.';
   $('rs-tips-h').textContent=S.def.dynTips?'שאלות שכדאי לחזור עליהן':'מה לזכור למבחן';
   const ul=$('rs-tips');ul.innerHTML='';(S.def.dynTips?S.def.dynTips():S.def.tips).forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li);});
+  S.sol=solutionText(S.def);
+  const sx=$('rs-sol-tx');sx.innerHTML='';S.sol.split('\n').forEach(l=>{const d=document.createElement('div');d.textContent=l;sx.appendChild(d);});
+  $('rs-sol').open=false;$('rs-ok').textContent='';
   const best=loadBest();if(!(best[S.def.id]>=pct)){best[S.def.id]=pct;try{localStorage.setItem('vhfsim.best',JSON.stringify(best));}catch(_){}}
   $('result').hidden=false;
 }
@@ -1596,6 +1660,13 @@ $('cp-done').onclick=()=>closeComposer(true);
 $('exit').onclick=goHome;$('rs-home').onclick=goHome;
 $('rs-again').onclick=()=>startScenario(S.def.again?S.def.again():S.def);
 $('tp-close').onclick=()=>{$('topics').hidden=true;};
+$('cp-sh').onclick=()=>shareText(C.v.title,composerText(),$('cp-ok'));
+$('cp-cp').onclick=()=>copyText(composerText(),$('cp-ok'));
+$('cp-dl').onclick=()=>saveText(C.v.title,composerText(),$('cp-ok'));
+$('rs-sh').onclick=()=>shareText(S.def.title,S.sol+siteFoot(),$('rs-ok'));
+$('rs-cp').onclick=()=>copyText(S.sol+siteFoot(),$('rs-ok'));
+$('rs-dl').onclick=()=>saveText('פתרון - '+S.def.title,S.sol+siteFoot(),$('rs-ok'));
+if(!navigator.share){$('cp-sh').hidden=true;$('rs-sh').hidden=true;}
 $('snd').onclick=()=>{muted=!muted;audio();if(master)master.gain.value=muted?0:1;$('snd').textContent='צליל: '+(muted?'כבוי':'פועל');};
 $('m-prac').onclick=()=>setMode(true);$('m-exam').onclick=()=>setMode(false);
 document.addEventListener('keydown',e=>{
