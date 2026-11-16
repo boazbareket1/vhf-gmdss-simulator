@@ -140,6 +140,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 .chip.alt.out{animation:none;border-color:var(--err);opacity:.7}
 .chip.alt .x{color:var(--err);font-weight:700}
 #cp-mode{margin-bottom:8px}
+#cp-hint{font-size:.85rem;line-height:1.5;background:var(--card2);border:1px solid var(--line);border-inline-start:3px solid var(--amber);border-radius:8px;padding:8px 10px;margin-bottom:8px}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .cmsg{font-size:.85rem;color:#ffc0b8;min-height:1.3em}
 .row{display:flex;gap:8px;margin-top:10px}
@@ -612,6 +613,7 @@ Y Yankee   Z Zulu</div>
   <div class="sheet">
     <h2 id="cp-ttl"></h2>
     <p id="cp-sub"></p>
+    <div id="cp-hint" hidden></div>
     <div class="seg" id="cp-mode" role="group" aria-label="אופן התרגול" hidden>
       <button id="cp-m-pick">בחירה בין ניסוחים</button>
       <button id="cp-m-build">הרכבה שורה אחר שורה</button>
@@ -1195,6 +1197,14 @@ function drawComposer(){
   if(C.i<C.lines.length){const d=document.createElement('div');d.className='ph';d.textContent='…';sc.appendChild(d);}
   const pool=$('cp-pool');pool.innerHTML='';
   const done=C.i>=C.lines.length,pick=C.mode==='pick';
+  {
+    /* the step guidance, so the window does not hide it */
+    const hb=$('cp-hint'),st=S&&S.def?cur():null;hb.innerHTML='';hb.hidden=!(st&&st.h)||done;
+    if(st&&st.h&&!done){
+      if(practice||S.flags.hint)hb.textContent='הנחיה: '+st.h;
+      else{const b=document.createElement('button');b.textContent='הצג רמז (מוריד חצי נקודה)';b.onclick=()=>{S.flags.hint=true;S.hints++;renderCoach();drawComposer();};hb.appendChild(b);}
+    }
+  }
   $('cp-mode').hidden=C.written||done||!C.alts||C.alts.length<2;
   $('cp-m-pick').classList.toggle('on',pick);$('cp-m-build').classList.toggle('on',!pick);
   $('cp-sub').textContent=C.written?'הקש על חלקי התשובה לפי הסדר שבו כותבים אותם.'
@@ -1372,7 +1382,7 @@ const SC=[
    done:(e,r)=>!!r.distress,ok:'ההתראה שודרה בערוץ 70 עם ה-MMSI, המיקום והשעה. המכשיר בערוץ 16 ובעוצמה גבוהה, ומציג WAIT ACK.'},
   {t:'המתן לאישור (ACK) מתחנת החוף, והשתק את הצפצוף.',h:'האישור מגיע תוך שניות. כשהמסך מציג RCVD DIST ACK, לחץ CLR.',
    done:(e,r)=>e.type==='alarm-silenced'&&!!r.distress&&r.distress.acked},
-  {t:'שדר בקול בערוץ 16 את קריאת ה-MAYDAY ואת הודעת המצוקה.',h:'לחץ על PTT והרכב בסדר הנכון. קודם הקריאה: MAYDAY ×3, השם ×3, MMSI. אחריה ההודעה: MAYDAY והשם, קו רוחב, קו אורך, מהות המצוקה, העזרה הנדרשת, מספר האנשים, OVER.',
+  {t:'שדר בקול בערוץ 16 את קריאת ה-MAYDAY ואת הודעת המצוקה.',h:'לחץ על PTT. קודם הקריאה: MAYDAY ×3, השם ×3, MMSI. אחריה ההודעה: MAYDAY והשם, קו רוחב, קו אורך, מהות המצוקה, העזרה הנדרשת, מספר האנשים, OVER.',
    voice:{id:'mayday',ch:16,hi:true,title:'קריאת MAYDAY',
      lines:['MAYDAY, MAYDAY, MAYDAY',ID3,'MMSI FOUR TWO EIGHT ONE TWO THREE FOUR FIVE SIX',`MAYDAY ${SHIP.name}`,'THREE TWO DEGREES FIVE TWO MINUTES NORTH','ZERO THREE FOUR DEGREES FIVE TWO MINUTES EAST','FIRE IN ENGINE ROOM, OUT OF CONTROL','REQUIRE IMMEDIATE ASSISTANCE','FOUR PERSONS ON BOARD','OVER'],
      decoys:[D_PANPAN,D_OUT]},
@@ -1420,7 +1430,7 @@ const SC=[
   {t:'שלח את הקריאה.',h:'המסך מציג ALL SHIPS CALL READY. ENT משדר את הקריאה בערוץ 70, והמכשיר חוזר לערוץ 16.',
    bad:e=>e.type==='dsc-sent'&&e.kind!=='urgency'?'נשלחה קריאה בעדיפות אחרת. חזור לתפריט ושלח קריאת URGENCY.':null,
    done:e=>e.type==='dsc-sent'&&e.kind==='urgency'},
-  {t:'שדר את הודעת ה-PAN PAN בקול בערוץ 16.',h:'לחץ PTT והרכב: PAN PAN ×3, ALL STATIONS ×3, זיהוי, מיקום, מהות הבעיה, העזרה הנדרשת, OVER.',
+  {t:'שדר את הודעת ה-PAN PAN בקול בערוץ 16.',h:'לחץ PTT. המבנה: PAN PAN ×3, ALL STATIONS ×3, זיהוי (THIS IS והשם שלך ×3, אות הקריאה וה-MMSI), מיקום, מהות הבעיה, העזרה הנדרשת, מספר האנשים, OVER.',
    voice:{id:'panpan',ch:16,hi:true,title:'הודעת PAN PAN',
      lines:['PAN PAN, PAN PAN, PAN PAN','ALL STATIONS, ALL STATIONS, ALL STATIONS',ID3,IDS,`MY POSITION IS ${SHIP.pos}`,'ENGINE FAILURE, DRIFTING TOWARDS SHORE','I REQUIRE A TOW',`${SHIP.pob} PERSONS ON BOARD`,'OVER'],
      decoys:[D_MAYDAY,D_OUT]},
@@ -1439,7 +1449,7 @@ const SC=[
   {t:'שלח את הקריאה.',h:'המסך מציג ALL SHIPS CALL READY. ENT משדר את הקריאה בערוץ 70.',
    bad:e=>e.type==='dsc-sent'&&e.kind!=='safety'?'נשלחה קריאה בעדיפות אחרת. חזור לתפריט ושלח קריאת SAFETY.':null,
    done:e=>e.type==='dsc-sent'&&e.kind==='safety'},
-  {t:'שדר את הודעת הבטיחות בקול בערוץ 16.',h:'לחץ PTT והרכב: SECURITE ×3, ALL STATIONS ×3, זיהוי, תוכן האזהרה, OUT.',
+  {t:'שדר את הודעת הבטיחות בקול בערוץ 16.',h:'לחץ PTT. המבנה: SECURITE ×3, ALL STATIONS ×3, זיהוי (THIS IS והשם שלך ×3, אות הקריאה וה-MMSI), תוכן האזהרה (מה ראית, באיזה מיקום, ומה הסכנה), OUT.',
    voice:{id:'securite',ch:16,title:'הודעת SECURITE',
      lines:['SECURITE, SECURITE, SECURITE','ALL STATIONS, ALL STATIONS, ALL STATIONS',ID3,IDS,"FLOATING CONTAINER SIGHTED IN POSITION 32°52'N 034°52'E",'DANGER TO NAVIGATION, KEEP SHARP LOOKOUT','OUT'],
      decoys:[D_PANPAN,D_OVER]},
@@ -1459,7 +1469,7 @@ const SC=[
   {t:`המתן לאישור מ-${OTHER.name} והשתק את הצלצול.`,h:'כשהמסך מציג Individual Call Tx — Rcvd Ack, לחץ CLR (Clr To Stop Beep).',
    done:(e,r)=>e.type==='alarm-silenced'&&!!r.workCh,ok:`${OTHER.name} אישרה. המכשיר עבר לערוץ העבודה.`},
   {t:`${OTHER.name} קרובה. הנמך את עוצמת השידור ל-1W.`,h:'לחץ HI/LO במיקרופון. עוצמה נמוכה מספיקה לטווח קצר ומפריעה פחות לאחרים.',done:(e,r)=>!r.hi},
-  {t:'פתח את השיחה בקול בערוץ העבודה.',h:'לחץ PTT והרכב: שם התחנה הנקראת, THIS IS והשם שלך, ההודעה, OVER.',
+  {t:'פתח את השיחה בקול בערוץ העבודה.',h:'לחץ PTT. המבנה: שם התחנה הנקראת, THIS IS והשם שלך, ההודעה, OVER.',
    voice:{id:'routine',ch:()=>R.workCh,title:'שיחה שגרתית',
      lines:[`${OTHER.name}, ${OTHER.name}`,`THIS IS ${SHIP.name}, ${SHIP.name}`,'PROPOSE WE MEET AT ATLIT ANCHORAGE AT 1600','OVER'],
      decoys:[{t:'ALL STATIONS, ALL STATIONS, ALL STATIONS',why:'זו שיחה עם כלי אחד, לא שידור לכל התחנות.'},D_OUT]},
@@ -1497,7 +1507,7 @@ const SC=[
     {t:'משדרים MAYDAY כדי להסביר מה קרה',why:'MAYDAY שמור למצוקה אמיתית. הודעת הביטול נפתחת ב-ALL STATIONS.'}]},
   {t:'בטל את ההתראה במכשיר.',h:'במסך הראשי לחץ CLR ואשר ב-ENT. המכשיר מפסיק את השידור החוזר ושולח הודעת ביטול ב-DSC. במכשיר שאין בו אפשרות כזו מכבים ומדליקים (VOL ON/OFF).',
    done:(e,r)=>r.on&&r.mode==='main'&&!r.distress,ok:'השידור החוזר נעצר.'},
-  {t:'הודע על הביטול בקול בערוץ 16.',h:'לחץ PTT והרכב: ALL STATIONS ×3, זיהוי מלא, מיקום, ובקשת הביטול עם שעת ההתראה.',
+  {t:'הודע על הביטול בקול בערוץ 16.',h:'לחץ PTT. המבנה: ALL STATIONS ×3, זיהוי מלא (THIS IS והשם שלך ×3, אות הקריאה וה-MMSI), מיקום, בקשת הביטול עם שעת ההתראה, OVER.',
    voice:{id:'cancel',ch:16,hi:true,title:'הודעת ביטול',
      lines:['ALL STATIONS, ALL STATIONS, ALL STATIONS',ID3,IDS,`POSITION ${SHIP.pos}`,()=>`PLEASE CANCEL MY DISTRESS ALERT OF ${lastDT} UTC`,'OVER'],
      decoys:[D_MAYDAY,{t:'SECURITE, SECURITE, SECURITE',why:'זו לא אזהרת ניווט. הודעת ביטול נפתחת ב-ALL STATIONS.'}]},
