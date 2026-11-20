@@ -183,6 +183,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 .tpl{direction:ltr;text-align:left;font-family:var(--mono);font-size:.78rem;background:#0a121a;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0 12px;white-space:pre-wrap;line-height:1.5;color:#cfe3f1}
 .gt{width:100%;border-collapse:collapse;font-size:.86rem;margin:6px 0 12px}
 .gt td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:right;vertical-align:top;color:#d5dfe7}
+.gt.gl td:first-child{white-space:normal;width:42%;font-size:.78rem}
 .gt td:first-child{font-family:var(--mono);font-weight:700;white-space:nowrap;direction:ltr;text-align:right;color:var(--ink);padding-left:12px}
 .why{font-size:.84rem;margin-top:6px;color:#c5d3de}
 .why summary{cursor:pointer;color:var(--amber);font-weight:600}
@@ -506,6 +507,54 @@ OVER</div>
       <tr><td>Z</td><td>אין הודעות לשידור.</td></tr>
     </table>
     <p>התדרים: 518 kHz באנגלית, ו-490 kHz בשפה המקומית. המקלט זוכר כל הודעה שנקלטה כראוי, ואינו מציג אותה שוב.</p>
+  </details>
+
+  <details>
+    <summary>NAVTEX: איך קוראים הודעה שלמה</summary>
+    <p>ההודעות כתובות באנגלית קצרה, באותיות גדולות. זו הודעה לדוגמה (לא הודעה אמיתית):</p>
+    <div class="tpl">ZCZC PA18
+161030 UTC NOV 26
+HAIFA RADIO
+NAVIGATIONAL WARNING NR 245/26
+HADERA APPROACH
+LIGHT BUOY IN POSITION 32-28.5N 034-51.2E UNLIT
+MARINERS ARE ADVISED TO NAVIGATE WITH CAUTION
+NNNN</div>
+    <table class="gt gl">
+      <tr><td>ZCZC PA18</td><td>פתיחה וקוד: תחנת חיפה, אזהרת ניווט, מספר 18.</td></tr>
+      <tr><td>161030 UTC NOV 26</td><td>מועד ההודעה: היום בחודש (16), השעה (10:30) ב-UTC, החודש והשנה.</td></tr>
+      <tr><td>HAIFA RADIO</td><td>התחנה, ואחריה סוג ההודעה ומספרה.</td></tr>
+      <tr><td>...</td><td>התוכן: איפה, מה קרה, ומה מבקשים מכלי השיט.</td></tr>
+      <tr><td>NNNN</td><td>סוף ההודעה.</td></tr>
+    </table>
+    <p>בכל הודעה מחפשים חמישה דברים: מי שידר, מה קרה, איפה, ממתי ועד מתי, ומה נדרש ממך. השעות תמיד ב-UTC. שעון ישראל מקדים את UTC בשעתיים בחורף ובשלוש שעות בקיץ.</p>
+    <h3>מילון קצר</h3>
+    <table class="gt gl">
+      <tr><td>NAVIGATIONAL WARNING</td><td>אזהרת ניווט.</td></tr>
+      <tr><td>GALE WARNING</td><td>אזהרת סערה (רוח בעוצמה 8 ומעלה).</td></tr>
+      <tr><td>WEATHER FORECAST</td><td>תחזית מזג אוויר.</td></tr>
+      <tr><td>FORCE 6</td><td>עוצמת רוח בסולם בופורט.</td></tr>
+      <tr><td>GUSTS</td><td>משבים.</td></tr>
+      <tr><td>BECOMING</td><td>משתנה ל.</td></tr>
+      <tr><td>VISIBILITY</td><td>ראות: GOOD טובה, MODERATE בינונית, POOR גרועה.</td></tr>
+      <tr><td>SEA: SLIGHT, MODERATE, ROUGH, HIGH</td><td>מצב הים: גלי קל, בינוני, גבוה, גבוה מאוד.</td></tr>
+      <tr><td>VALID FROM ... TO ...</td><td>בתוקף מ... עד...</td></tr>
+      <tr><td>LIGHT BUOY / LIGHTHOUSE</td><td>מצוף מואר, מגדלור.</td></tr>
+      <tr><td>UNLIT</td><td>האור כבוי.</td></tr>
+      <tr><td>OFF STATION</td><td>המצוף אינו במקומו.</td></tr>
+      <tr><td>ADRIFT</td><td>נסחף.</td></tr>
+      <tr><td>WRECK</td><td>שבר כלי שיט טבוע.</td></tr>
+      <tr><td>FIRING PRACTICE</td><td>תרגיל ירי.</td></tr>
+      <tr><td>IN AREA BOUNDED BY</td><td>בשטח שתחום בין הנקודות הבאות.</td></tr>
+      <tr><td>KEEP CLEAR</td><td>להתרחק, לא להיכנס.</td></tr>
+      <tr><td>WIDE BERTH REQUESTED</td><td>מבקשים לעבור במרחק גדול.</td></tr>
+      <tr><td>NAVIGATE WITH CAUTION</td><td>לנווט בזהירות.</td></tr>
+      <tr><td>KEEP SHARP LOOKOUT</td><td>לקיים תצפית ערנית.</td></tr>
+      <tr><td>PERSONS ON BOARD</td><td>מספר האנשים על הכלי.</td></tr>
+      <tr><td>RCC / MRCC</td><td>מרכז תיאום חיפוש והצלה.</td></tr>
+      <tr><td>CANCEL THIS MSG</td><td>ההודעה מבוטלת במועד שכתוב אחריה.</td></tr>
+    </table>
+    <p>לתרגול: "תרגולים מהירים", ואז "קריאת הודעות NAVTEX".</p>
   </details>
 
   <details>
@@ -1295,6 +1344,7 @@ function solutionText(def,mine){
   if(mine&&S&&S.pct!=null)out.push(`הציון שלי: ${S.pct}% · טעויות: ${S.errs}`,'');
   def.steps.forEach((st,i)=>{
     const v=st.write||st.voice;
+    if(st.say)st.say.replace(/<[^>]+>/g,'').split('\n').forEach(l=>out.push('   | '+l));
     out.push(`${i+1}. ${st.t}`);
     if(v){
       const vl=v.lines.map(l=>typeof l==='function'?l():l);
@@ -1811,8 +1861,85 @@ const NAVQ=[
  ['','איזו תחנה שידרה את ההודעה ZCZC NB05?',['אלכסנדריה','חיפה','אנטליה','איזמיר'],'התו הראשון הוא התחנה: N אלכסנדריה. P חיפה, M קפריסין, F אנטליה, I איזמיר.'],
  ['','אתה מפליג מחיפה לכיוון דרום טורקיה. אילו אותיות תחנה כדאי לבחור במקלט?',['P (חיפה), M (קפריסין) ו-F (אנטליה)','P (חיפה) בלבד','N (אלכסנדריה) ו-I (איזמיר)','A, B ו-D'],'בוחרים את התחנות שלאורך המסלול. A, B ו-D הם נושאי הודעות, לא תחנות.'],
  ['','אילו סוגי הודעות אי אפשר לסנן במקלט NAVTEX?',['אזהרות ניווט (A), אזהרות מטאורולוגיות (B) וחיפוש והצלה (D)','תחזיות מזג אוויר (E) בלבד','אפשר לסנן כל סוג הודעה','הודעות Z בלבד'],'הודעות A, B ו-D נוגעות ישירות לבטיחות, ולכן המקלט מציג אותן תמיד.'],
- ['','הודעת NAVTEX נפתחת ב-ZCZC. במה היא מסתיימת?',['NNNN','OVER','ZZZZ','OUT'],'כל הודעה נפתחת ב-ZCZC ובקוד של ארבעה תווים, ומסתיימת ב-NNNN.']
+ ['','הודעת NAVTEX נפתחת ב-ZCZC. במה היא מסתיימת?',['NNNN','OVER','ZZZZ','OUT'],'כל הודעה נפתחת ב-ZCZC ובקוד של ארבעה תווים, ומסתיימת ב-NNNN.'],
+ ['','מה ההבדל בין התדרים 518 kHz ו-490 kHz ב-NAVTEX?',['518 kHz הוא התדר הבינלאומי, באנגלית. 490 kHz משמש לשידור בשפה המקומית','518 kHz משמש ביום, ו-490 kHz בלילה','518 kHz לאזהרות, ו-490 kHz לתחזיות','518 kHz לאוניות, ו-490 kHz ליאכטות'],'כל התחנות משדרות באנגלית ב-518 kHz. חלקן משדרות גם בשפת המדינה ב-490 kHz.'],
+ ['','בשורה השנייה של הודעת NAVTEX כתוב 161030 UTC NOV 26. מה זה אומר?',['ההודעה נכתבה ב-16 בנובמבר 2026, בשעה 10:30 UTC','ההודעה נכתבה ב-10 בנובמבר, בשעה 16:30','ההודעה תקפה עד 26 בנובמבר, בשעה 16:10','מספר ההודעה הוא 161030'],'שתי הספרות הראשונות הן היום בחודש, וארבע הבאות הן השעה ב-UTC. אחריהן החודש והשנה.']
 ];
+/* Full sample NAVTEX messages (invented for practice, in the real ZCZC ... NNNN layout) with comprehension questions. */
+const NTX=[
+ {msg:`ZCZC PA18
+161030 UTC NOV 26
+HAIFA RADIO
+NAVIGATIONAL WARNING NR 245/26
+ISRAEL - MEDITERRANEAN COAST - HADERA APPROACH
+LIGHT BUOY IN POSITION 32-28.5N 034-51.2E UNLIT
+MARINERS ARE ADVISED TO NAVIGATE WITH CAUTION
+NNNN`,qs:[
+  ['מי שידר את ההודעה, ומה הנושא שלה?',['תחנת חיפה, אזהרת ניווט, הודעה מספר 18','תחנת חיפה, אזהרה מטאורולוגית, הודעה מספר 18','תחנת קפריסין, אזהרת ניווט, הודעה מספר 18','תחנת חיפה, תחזית מזג אוויר לשעה 18:00'],'הקוד PA18: ‏P היא תחנת חיפה, A הוא אזהרות ניווט, ו-18 הוא המספר הסידורי.'],
+  ['מה קרה לפי ההודעה?',['מצוף מואר ליד הכניסה לחדרה אינו מאיר','מצוף ניתק ונסחף בים','כלי שיט עלה על שרטון ליד חדרה','נמל חדרה נסגר לכניסת כלי שיט'],'LIGHT BUOY הוא מצוף מואר, ו-UNLIT פירושו שהאור שלו כבוי. המצוף עצמו נשאר במקומו.'],
+  ['מתי שודרה ההודעה?',['ב-16 בנובמבר, בשעה 10:30 UTC','ב-10 בנובמבר, בשעה 16:30 UTC','בשעה 16:10, 30 דקות לפני השידור הבא','ב-26 בנובמבר, בשעה 16:10 UTC'],'בשורה 161030 UTC NOV 26 שתי הספרות הראשונות הן היום בחודש (16), וארבע הבאות הן השעה (10:30) ב-UTC.'],
+  ['מה נדרש ממך?',['לנווט בזהירות באזור, ולא לסמוך על האור של המצוף','להתרחק מהאזור לפחות 5 מייל','לדווח לחיפה רדיו כשאתה עובר ליד המצוף','שום דבר. ההודעה מיועדת לאוניות בלבד'],'NAVIGATE WITH CAUTION: לנווט בזהירות. בלילה לא תראה את האור במקום שבו המפה מראה אותו.']]},
+ {msg:`ZCZC PB07
+170600 UTC NOV 26
+HAIFA RADIO
+GALE WARNING NR 12
+SOUTHEAST LEVANT BASIN
+WEST TO NORTHWEST WIND FORCE 8, GUSTS FORCE 9
+SEA VERY ROUGH TO HIGH
+VALID FROM 171200 UTC TO 180600 UTC
+NNNN`,qs:[
+  ['איזה סוג הודעה זו?',['אזהרה מטאורולוגית: אזהרת סערה','תחזית מזג אוויר שגרתית','אזהרת ניווט','הודעת חיפוש והצלה'],'התו השני בקוד הוא B, אזהרות מטאורולוגיות. גם הכותרת אומרת זאת: GALE WARNING, אזהרת סערה.'],
+  ['מה צפוי לפי ההודעה?',['רוח מערבית עד צפון-מערבית בעוצמה 8, משבים עד 9, וים גבוה','רוח מזרחית בעוצמה 8 וים שקט','רוח קלה עד 9 קשר וים גלי קל','ערפל כבד וראות של 8 עד 9 מייל'],'WIND FORCE 8 היא עוצמה 8 בסולם בופורט, כלומר סערה. GUSTS הם משבים. VERY ROUGH TO HIGH הוא ים גבוה מאוד.'],
+  ['ממתי ועד מתי האזהרה בתוקף?',['מ-17 בחודש ב-12:00 UTC ועד 18 בחודש ב-06:00 UTC','מ-12 בחודש ב-17:00 ועד 6 בחודש ב-18:00','משעה 17:12 ועד שעה 18:06 באותו יום','מרגע השידור ועד להודעה חדשה'],'VALID FROM 171200 UTC TO 180600 UTC: היום בחודש ואחריו השעה. האזהרה מתחילה 6 שעות אחרי השידור.'],
+  ['האם אפשר להגדיר את המקלט כך שלא יציג הודעות מהסוג הזה?',['לא. אזהרות מטאורולוגיות (B) מוצגות תמיד','כן, כמו כל סוג הודעה אחר','כן, אבל רק בהפלגה ביום','רק אם בוחרים תחנה אחרת'],'הודעות A, ‏B ו-D נוגעות ישירות לבטיחות, ואי אפשר לסנן אותן.']]},
+ {msg:`ZCZC PD00
+181415 UTC NOV 26
+HAIFA RADIO
+MAYDAY RELAY
+SAILING YACHT ORION, THREE PERSONS ON BOARD
+REPORTED SINKING IN POSITION 32-58N 034-48E AT 181400 UTC
+ALL VESSELS IN THE AREA ARE REQUESTED TO KEEP SHARP LOOKOUT,
+TO ASSIST IF POSSIBLE AND TO REPORT TO RCC HAIFA
+NNNN`,qs:[
+  ['למה ההודעה הזו מוצגת מיד ומפעילה התראה במקלט?',['הנושא D הוא חיפוש והצלה, והמספר 00 שמור להודעות חירום','זו ההודעה הראשונה שהתחנה שידרה היום','המספר 00 מציין שזו הודעת בדיקה','כל הודעה מתחנת חיפה מפעילה התראה'],'D הוא חיפוש והצלה. המספר הסידורי 00 שמור להודעות הדחופות ביותר, והמקלט מציג אותן תמיד.'],
+  ['מה קרה לפי ההודעה?',['היאכטה ORION, עם 3 אנשים, דווחה כטובעת','היאכטה ORION מחפשת 3 אנשים שנפלו לים','אונייה בשם ORION איבדה 3 מכולות','היאכטה ORION מבקשת גרירה לחיפה'],'SAILING YACHT ORION, THREE PERSONS ON BOARD, REPORTED SINKING: יאכטת מפרשים עם שלושה אנשים דווחה כטובעת.'],
+  ['מה מבקשים מכלי השיט שבאזור?',['לקיים תצפית ערנית, לסייע אם אפשר ולדווח למרכז ההצלה בחיפה','להתרחק מהאזור ולשמור על דממת קשר','לשדר MAYDAY RELAY בערוץ 16','להמשיך כרגיל. ההודעה מיועדת לכוחות ההצלה בלבד'],'KEEP SHARP LOOKOUT: תצפית ערנית. ASSIST IF POSSIBLE: לסייע אם אפשר. REPORT TO RCC HAIFA: לדווח למרכז תיאום ההצלה בחיפה.'],
+  ['אתה במיקום 32-50N 034-50E. מה נכון לעשות?',['אתה כ-8 מייל מהמקום: לדווח ל-RCC חיפה, ולהיות מוכן לסייע','שום דבר. אתה רחוק מאות מיילים','לשלוח Distress Alert משלך כדי למשוך תשומת לב','לכבות את המקלט כדי שההתראה תפסיק'],'8 דקות רוחב הן 8 מייל ימי. אתה קרוב, ולכן יוצרים קשר עם מרכז ההצלה ופועלים לפי הנחיותיו.']]},
+ {msg:`ZCZC ME33
+190600 UTC NOV 26
+CYPRUS RADIO
+WEATHER FORECAST VALID FOR 24 HOURS FROM 190600 UTC
+AREA: SOUTHEAST LEVANT
+WIND: NORTHWEST FORCE 4 TO 5, BECOMING WEST FORCE 3 BY EVENING
+SEA: MODERATE
+VISIBILITY: GOOD, LOCALLY MODERATE IN SHOWERS
+NNNN`,qs:[
+  ['מי שידר את ההודעה, ומה הנושא שלה?',['תחנת קפריסין, תחזית מזג אוויר','תחנת חיפה, תחזית מזג אוויר','תחנת קפריסין, אזהרת סערה','תחנת אלכסנדריה, אזהרת ניווט'],'הקוד ME33: ‏M היא תחנת קפריסין, ו-E הוא תחזית מזג אוויר שגרתית.'],
+  ['איך תשתנה הרוח במהלך היום?',['מצפון-מערבית בעוצמה 4 עד 5, למערבית בעוצמה 3 עד הערב','ממערבית בעוצמה 3, לצפון-מערבית בעוצמה 4 עד 5','היא תתחזק מעוצמה 3 לעוצמה 5 עד הערב','היא תישאר צפון-מערבית בעוצמה 4 עד 5'],'BECOMING פירושו "משתנה ל". הרוח נחלשת ופונה מערבה עד הערב.'],
+  ['מה הראות הצפויה?',['טובה, ובינונית במקומות שבהם יורדים ממטרים','גרועה בכל האזור בגלל גשם','טובה בלי שום הגבלה','בינונית, ומשתפרת עד הערב'],'VISIBILITY: GOOD, LOCALLY MODERATE IN SHOWERS. ‏LOCALLY פירושו במקומות מסוימים, ו-SHOWERS הם ממטרים.'],
+  ['לכמה זמן התחזית תקפה?',['ל-24 שעות, מ-19 בחודש בשעה 06:00 UTC','ל-19 שעות, משעה 06:00','עד סוף החודש','ל-6 שעות, מ-19 בחודש'],'VALID FOR 24 HOURS FROM 190600 UTC: ‏24 שעות, החל ב-19 בחודש בשעה 06:00 UTC.']]},
+ {msg:`ZCZC PA24
+200800 UTC NOV 26
+HAIFA RADIO
+NAVIGATIONAL WARNING NR 251/26
+FIRING PRACTICE ON 21 NOV FROM 0500 UTC TO 1300 UTC
+IN AREA BOUNDED BY:
+32-10N 034-30E
+32-10N 034-45E
+32-00N 034-45E
+32-00N 034-30E
+VESSELS ARE REQUESTED TO KEEP CLEAR OF THE AREA
+NNNN`,qs:[
+  ['על מה ההודעה מזהירה?',['תרגיל ירי בשטח מוגדר בים','שריפה על כלי שיט','כבל תת-ימי שמונח בשטח','תחרות שיט בשטח מוגדר'],'FIRING PRACTICE הוא תרגיל ירי. זו אזהרת ניווט (A), ולכן היא מוצגת תמיד.'],
+  ['מתי התרגיל, לפי שעון ישראל (בחורף, UTC+2)?',['ב-21 בנובמבר, מ-07:00 עד 15:00','ב-21 בנובמבר, מ-05:00 עד 13:00','ב-21 בנובמבר, מ-03:00 עד 11:00','ב-20 בנובמבר, מ-08:00 עד 16:00'],'השעות בהודעות NAVTEX הן ב-UTC. בחורף שעון ישראל מקדים את UTC בשעתיים: 05:00 UTC היא 07:00, ו-13:00 UTC היא 15:00.'],
+  ['איך מוגדר השטח?',['מלבן בין ארבע נקודות ציון: מ-32-00N עד 32-10N, ומ-034-30E עד 034-45E','מעגל ברדיוס 10 מייל סביב נקודה אחת','רצועה לאורך החוף, מחיפה ועד אשדוד','קו ישר בין שתי נקודות'],'IN AREA BOUNDED BY: בשטח שתחום בין הנקודות שברשימה. ארבע נקודות יוצרות מלבן.'],
+  ['מה נדרש ממך?',['לא להיכנס לשטח בזמן התרגיל','לחצות את השטח מהר ככל האפשר','לבקש אישור מעבר בערוץ 16','להדליק אורות ניווט ולהמשיך כרגיל'],'KEEP CLEAR OF THE AREA: להתרחק מהשטח ולא להיכנס אליו. מתכננים את המסלול מסביב.']]}
+];
+function navReadDef(){
+  const steps=[];
+  shuffle(NTX.slice()).slice(0,3).forEach(m=>m.qs.forEach(q=>steps.push(Object.assign(mkQ(['',q[0],q[1],q[2]]),{say:'<div style="white-space:pre-wrap">'+m.msg+'</div>'}))));
+  return {id:'drill',paper:true,title:'קריאת הודעות NAVTEX',sit:'לפניך הודעות NAVTEX באנגלית, במבנה שבו הן מודפסות במקלט. ההודעות הן דוגמאות לתרגול. קרא כל הודעה וענה: מי שידר, מה קרה, איפה, מתי ומה נדרש ממך.',steps,again:navReadDef,dynTips:()=>wrongTips(steps)};
+}
 const MMSIQ=[
  ['','למי שייך ה-MMSI ‏428104592?',['כלי שיט ישראלי','תחנת חוף ישראלית','קבוצת כלי שיט ישראליים','משואת AIS-SART'],'9 ספרות שמתחילות ישר בקוד המדינה 428: כלי שיט ישראלי.'],
  ['','למי שייך ה-MMSI ‏004280001?',['תחנת חוף ישראלית: חיפה רדיו','כלי שיט ישראלי','קבוצת כלי שיט ישראליים','כלי שיט שאינו ישראלי'],'שני אפסים בהתחלה, ואחריהם קוד המדינה: תחנת חוף. לפי סימולטור התרגול, 004280001 היא חיפה רדיו.'],
@@ -1829,6 +1956,7 @@ function openDrills(){
   openMenu('תרגולים מהירים','תרגול קצר של מיומנות אחת בכל פעם.',[
     ['איות פונטי: 6 שמות ואותיות קריאה',phonDef],
     [`פענוח קוד NAVTEX (${NAVQ.length})`,()=>quizDef('פענוח קוד NAVTEX','כל הודעת NAVTEX נפתחת ב-ZCZC ובקוד של ארבעה תווים: תחנה, נושא ומספר סידורי.',NAVQ)],
+    [`קריאת הודעות NAVTEX: 3 הודעות מתוך ${NTX.length}`,navReadDef],
     [`זיהוי MMSI (${MMSIQ.length})`,()=>quizDef('זיהוי MMSI','מהספרות הראשונות של ה-MMSI אפשר לדעת למי הוא שייך.',MMSIQ)]
   ]);
 }
@@ -1972,7 +2100,7 @@ function drawHome(){
   k.onclick=openTopics;
   list.insertBefore(k,x.nextSibling);
   const dr=document.createElement('button');dr.className='sc';
-  dr.innerHTML='<div class="sc-top"><span class="tag t-r">תרגול מהיר</span></div><div class="sc-title">תרגולים מהירים</div><div class="sc-desc">איות פונטי, פענוח קוד NAVTEX וזיהוי MMSI</div>';
+  dr.innerHTML='<div class="sc-top"><span class="tag t-r">תרגול מהיר</span></div><div class="sc-title">תרגולים מהירים</div><div class="sc-desc">איות פונטי, קוד NAVTEX, קריאת הודעות NAVTEX וזיהוי MMSI</div>';
   dr.onclick=openDrills;
   list.insertBefore(dr,k.nextSibling);
   const f=document.createElement('button');f.className='sc';
