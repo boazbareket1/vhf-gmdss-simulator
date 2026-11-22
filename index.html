@@ -155,6 +155,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 .sharerow span{font-size:.82rem;color:var(--mute)}
 .sbtn{font-size:.85rem;font-weight:600;border:1px solid #3b5d73;border-radius:8px;padding:7px 12px;background:var(--card2);color:var(--ink)}
 .sbtn:hover{border-color:var(--amber)}
+.scrbtn{display:block;width:100%;margin:6px 0 2px;font-size:.78rem;font-weight:600;color:#cfe3f1;background:#16222c;border:1px solid #37576b;border-radius:7px;padding:6px 8px}
+.scrbtn:hover{border-color:var(--amber);color:var(--ink)}
+.sx-lbl{display:block;font-size:.82rem;color:var(--mute);margin:10px 0 6px}
+.sx-lbl select{display:block;width:100%;margin-top:4px;font:inherit;font-size:.9rem;color:var(--ink);background:var(--card2);border:1px solid #3b5d73;border-radius:8px;padding:8px}
+#sx-body h3{margin:10px 0 6px;font-size:1rem;color:var(--amber)}
+#sx-body h4{margin:12px 0 2px;font-size:.86rem}
+#sx-body .sx-p{color:#d5dfe7;font-size:.88rem;line-height:1.55;margin:0 0 8px}
+#sx-body .gt{width:100%;border-collapse:collapse;font-size:.84rem}
 .okmsg{font-size:.82rem;color:#9bf0c8;min-height:1.2em;margin-top:4px}
 .sol{font-family:var(--mono);font-size:.76rem;background:#0a121a;border:1px solid var(--line);border-radius:10px;padding:8px 10px;max-height:38vh;overflow:auto;margin-top:6px;color:#cfe3f1}
 .sol div{unicode-bidi:plaintext;text-align:start;white-space:pre-wrap;min-height:.7em}
@@ -631,6 +639,7 @@ Y Yankee   Z Zulu</div>
         <span class="brand">SEALINK VX-25</span><span class="cls">VHF · DSC CLASS D</span>
       </div>
       <div class="lcd off" id="lcd"></div>
+      <button class="scrbtn" id="scr-btn">מה אני רואה במסך?</button>
       <div class="knobs">
         <div class="knob"><button class="kb" data-k="vol-" aria-label="Volume down">−</button><button class="pwr" id="pwr" aria-label="Volume knob, power on and off">VOL<small>ON/OFF</small></button><button class="kb" data-k="vol+" aria-label="Volume up">+</button></div>
         <div class="knob"><button class="kb" data-k="sql-" aria-label="Squelch down">−</button><span>SQL</span><button class="kb" data-k="sql+" aria-label="Squelch up">+</button></div>
@@ -681,6 +690,24 @@ Y Yankee   Z Zulu</div>
       <button class="btn sec" id="cp-cancel">ביטול</button>
       <button class="btn" id="cp-done" hidden>שחרר PTT — סיום שידור</button>
     </div>
+  </div>
+</div>
+
+<!-- screen explanation -->
+<div class="modal" id="scrx" hidden>
+  <div class="sheet">
+    <h2 id="sx-ttl"></h2>
+    <div id="sx-img" hidden>
+      <p>בחר צילום מסך או תמונה של מסך המכשיר, ותקבל הסבר על המסך. זיהוי הטקסט נעשה בדפדפן שלך: התמונה נשארת במכשיר שלך ואינה נשלחת לשום מקום. בשימוש הראשון יורד רכיב זיהוי הטקסט (כמה מגה-בייט), ולכן צריך חיבור לאינטרנט.</p>
+      <input type="file" id="sx-file" accept="image/*" hidden>
+      <div class="row"><button class="btn" id="sx-pick">בחר תמונה או צלם</button></div>
+      <div class="okmsg" id="sx-st" role="status"></div>
+      <div class="sharerow" id="sx-cand"></div>
+      <details class="why" id="sx-raw" hidden><summary>הטקסט שנקרא מהתמונה</summary><div class="tpl" id="sx-raw-tx"></div></details>
+    </div>
+    <label class="sx-lbl"><span id="sx-sel-lbl"></span><select id="sx-sel"></select></label>
+    <div id="sx-body"></div>
+    <div class="row"><button class="btn sec" id="sx-close">סגור</button></div>
   </div>
 </div>
 
@@ -1217,6 +1244,399 @@ function render(){
   $('dwell').classList.toggle('open',!!R.cover);
   $('dcover').innerHTML=R.cover?'COVER OPEN':'DISTRESS<br>LIFT COVER';
   updNoise();
+}
+
+/* ================= screen catalog: explains every screen of the device =================
+   k: English key phrases that identify the screen in recognised text, with weights.
+   Used by "מה אני רואה במסך?" on the radio, and by the image explainer (in-browser OCR). */
+const K_MENU=[['▲ ▼','מזיזים את הסמן בין השורות.'],['ENT','בוחר את השורה המסומנת.'],['CLR','חוזר מסך אחד אחורה.']];
+const SCREENS=[
+{id:'main',t:'המסך הראשי: האזנה בערוץ 16',k:{'ch > select channel':4,'calling':2},
+ what:'מסך ההאזנה. כך נראה המכשיר רוב הזמן: מכוון לערוץ 16, ערוץ הקריאה והמצוקה, ומאזין.',
+ how:'מופיע אחרי ההדלקה. מכל מסך אחר חוזרים אליו במקש 16, או בלחיצות CLR.',
+ rows:[['16','הערוץ הפעיל.'],['CALLING','ייעוד הערוץ. ערוץ 16 הוא ערוץ הקריאה.'],['INT','טבלת הערוצים הבינלאומית.'],['25W / 1W','עוצמת השידור: גבוהה או נמוכה. מחליפים ב-HI/LO שבמיקרופון.'],['CH > Select Channel','תזכורת: המקש CH פותח את בחירת הערוץ.'],['34.56N 032.46E','המיקום שהמכשיר ישדר בהתראת מצוקה: קו רוחב ואחריו קו אורך.'],['1230 UTC','השעה ב-UTC. היא מצורפת להתראת המצוקה.']],
+ keys:[['CH','בחירת ערוץ אחר.'],['MENU','פותח את תפריט ה-DSC.'],['PTT','שידור בקול בערוץ שבמסך.'],['HI/LO','מחליף בין 25W ל-1W.'],['DISTRESS','מתחת למכסה. לחיצה של 5 שניות שולחת התראת מצוקה.']],
+ exam:'לפני כל פעולה בודקים במסך הזה שלושה דברים: שהמכשיר בערוץ 16, שהעוצמה מתאימה, ושהמיקום והשעה מעודכנים. מיקום ישן בהתראת מצוקה שולח את המחלצים למקום הלא נכון.'},
+{id:'ch',t:'בחירת ערוץ',k:{'exit > clear':2,'ch > dw':4,'ch > dw off':4,'dw on':3,'intership':1,'port operation':2,'ships movement':2,'bridge to bridge':2,'on board com':2,'public corresp':2,'guard band':2,'duplex':1},
+ what:'מצב בחירת ערוץ. מספר הערוץ משתנה בחיצים, ולידו מופיע ייעוד הערוץ.',
+ how:'מהמסך הראשי לוחצים CH.',
+ rows:[['INTERSHIP','ערוץ בין-ספינתי: שיחה בין כלי שיט.'],['PORT OPERATION','תפעול נמל.'],['SHIPS MOVEMENT','תנועת כלי שיט.'],['BRIDGE TO BRIDGE','ערוץ 13: בטיחות שיט בין גשרי פיקוד.'],['ON BOARD COM.','ערוצים 15 ו-17: קשר פנימי על הכלי, ב-1W בלבד.'],['PUBLIC CORRESP.','שיחות דרך תחנת חוף.'],['GUARD BAND','ערוצים 75 ו-76: רצועת הגנה סביב ערוץ 16. לא משדרים בהם.'],['CH > DW','לחיצה נוספת על CH מפעילה Dual Watch: האזנה לערוץ הנבחר ולערוץ 16 לסירוגין.'],['DW on','ה-Dual Watch פעיל.'],['Exit > Clear','CLR יוצא וחוזר לערוץ 16.']],
+ keys:[['▲ ▼','מחליפים ערוץ. אפשר גם בחיצים שבמיקרופון.'],['CH','מפעיל או מכבה Dual Watch.'],['16','חוזר מיד לערוץ 16.'],['CLR','יוצא וחוזר לערוץ 16.']],
+ exam:'צריך להכיר את ייעודי הערוצים: 16 קריאה ומצוקה, 70 ל-DSC בלבד (אי אפשר לבחור בו לדיבור), 13 גשר לגשר, 06 בין-ספינתי וחיפוש והצלה. אחרי שיחה בערוץ עבודה חוזרים ל-16.'},
+{id:'menu1',t:'תפריט ה-DSC, עמוד 1',k:{'dsc menu - 1':4,'dsc menu':2,'polling request':3,'distress setting':3,'received calls':1,'set up':1},
+ what:'העמוד הראשון של תפריט ה-DSC. מכאן מגיעים להגדרת התראת מצוקה, ליומן הקריאות ולהגדרות.',
+ how:'לוחצים MENU מהמסך הראשי. הסמן מתחיל על Distress Setting.',
+ rows:[['Polling Request','בקשת מיקום מתחנה אחרת. לא זמין בסימולטור.'],['Received Calls','יומן הקריאות שהתקבלו ב-DSC.'],['Distress Setting','הכנת התראת מצוקה: סוג המצוקה, שעה ומיקום.'],['Set Up','הגדרות: שעה ומיקום ידניים, בדיקת MMSI, בדיקה עצמית.']],
+ keys:K_MENU.concat([['▼ בשורה האחרונה','עובר לעמוד 2: Individual Call, Group Call, All Ships CALL.']]),
+ exam:'במצוקה הדרך היא MENU, ‏Distress Setting, סוג המצוקה, שעה ומיקום, ואז 5 שניות על DISTRESS. קריאות דחיפות, בטיחות ושגרה נמצאות בעמוד 2.'},
+{id:'menu2',t:'תפריט ה-DSC, עמוד 2',k:{'dsc menu - 2':4,'dsc menu':2,'individual call':2,'group call':2,'all ships call':2},
+ what:'העמוד השני של תפריט ה-DSC: שלושת סוגי הקריאות שאינן מצוקה.',
+ how:'MENU, ואז ▼ עד שעוברים את סוף העמוד הראשון.',
+ rows:[['Individual Call','קריאה לתחנה אחת לפי ה-MMSI שלה: יאכטה, תחנת חוף או מרינה.'],['Group Call','קריאה לקבוצת כלי שיט שיש להם MMSI קבוצתי משותף.'],['All Ships CALL','קריאה לכל התחנות. כאן שולחים קריאת דחיפות (PAN PAN) או בטיחות (SECURITE).']],
+ keys:K_MENU,
+ exam:'PAN PAN ו-SECURITE נשלחים דרך All Ships CALL, ולא בלחצן DISTRESS. שיחה עם כלי מסוים נשלחת דרך Individual Call.'},
+{id:'rcvd',t:'קריאות שהתקבלו: בחירת סוג',k:{'select rcvd msg':5,'others':2},
+ what:'כניסה ליומן הקריאות. בוחרים איזה סוג קריאות להציג.',
+ how:'MENU, ‏Received Calls, ‏ENT.',
+ rows:[['Distress','התראות מצוקה שהתקבלו מכלי שיט אחרים.'],['Others','כל השאר: קריאות דחיפות, בטיחות ושגרה.']],
+ keys:K_MENU,
+ exam:'המכשיר שומר את הקריאות שהתקבלו גם אם לא היית ליד המכשיר. משם מעתיקים את הפרטים ליומן הרדיו.'},
+{id:'rlistd',t:'Received Calls: יומן התראות המצוקה',k:{'received calls':3,'distress sinking':3,'distress flooding':3,'distress listing':3,'distress grounded':3,'mmsi':1},
+ what:'רשימת התראות המצוקה שהמכשיר קלט ב-DSC, מהחדשה לישנה. כל רשומה נפרשת על שתי שורות.',
+ how:'MENU, ‏Received Calls, ‏Distress, ‏ENT.',
+ rows:[['Distress sinking','סוג המצוקה כפי שהכלי שבמצוקה בחר: sinking טביעה, flooding הצפה, listing נטייה מסוכנת, grounded עלייה על שרטון.'],['32.17N 34.16E','מיקום הכלי שבמצוקה: קו רוחב ואחריו קו אורך, במעלות ובדקות.'],['1805','שעת ההתראה ב-UTC.'],['Feb 5th 06','תאריך ההתראה.'],['MMSI 375000234','מספר הזיהוי של הכלי שבמצוקה. שלוש הספרות הראשונות הן קוד המדינה שבה הוא רשום.'],['החיצים בצד המסך','יש רשומות נוספות. גוללים ב-▲ וב-▼.']],
+ keys:[['▲ ▼','גוללים ברשימה.'],['CLR','יוצא מהיומן.']],
+ exam:'מכל רשומה מעתיקים ליומן הרדיו ארבעה נתונים: סוג המצוקה, מיקום, שעה ו-MMSI. כלי שיט אינו מאשר התראת מצוקה ב-DSC: מאזינים בערוץ 16, ואם תחנת חוף לא עונה מאשרים בקול ומעבירים MAYDAY RELAY.'},
+{id:'rlisto',t:'Received Calls: יומן שאר הקריאות',k:{'received calls':3,'all ships urgency':4,'all ships safety':4,'routine from':4,'ack from':3},
+ what:'רשימת הקריאות שאינן מצוקה: קריאות לכל התחנות וקריאות אישיות שהתקבלו.',
+ how:'MENU, ‏Received Calls, ‏Others, ‏ENT.',
+ rows:[['All Ships Urgency','קריאת דחיפות לכל התחנות. אחריה באה הודעת PAN PAN בקול בערוץ 16.'],['30.19N 32.56E 0300','המיקום של התחנה הקוראת ושעת הקריאה ב-UTC.'],['Routine from MMSI ...','קריאה שגרתית אישית, ומי שלח אותה.'],['MMSI 00...','MMSI שמתחיל בשני אפסים שייך לתחנת חוף.']],
+ keys:[['▲ ▼','גוללים ברשימה.'],['CLR','יוצא מהיומן.']],
+ exam:'מה-MMSI מזהים מי קרא: 9 ספרות שמתחילות בקוד מדינה הן כלי שיט, שני אפסים בהתחלה הם תחנת חוף, ואפס אחד הוא קבוצה.'},
+{id:'setup',t:'תפריט ההגדרות (Set Up)',k:{'set up menu':5,'indv id':3,'group id':3,'set time & position':2,'mmsi check':2,'test':1},
+ what:'תפריט ההגדרות של המכשיר.',
+ how:'MENU, ▼ אל Set Up, ‏ENT.',
+ rows:[['Indv ID','ספר הכתובות של תחנות בודדות. לא זמין בסימולטור.'],['Group ID','הגדרת MMSI קבוצתי. לא זמין בסימולטור.'],['Set Time & Position','הזנה ידנית של שעה ומיקום, כשאין GPS.'],['MMSI Check','מציג את ה-MMSI שמתוכנת במכשיר.'],['Test','בדיקה עצמית של חלק ה-DSC.']],
+ keys:K_MENU,
+ exam:'כשאין GPS חובה לעדכן שעה ומיקום ידנית, ולחזור על כך בהפלגה. בלי זה התראת המצוקה יוצאת בלי מיקום.'},
+{id:'mmsicheck',t:'MMSI Check: ה-MMSI של המכשיר',k:{'mmsi check':3,'exit > clr':3},
+ what:'המסך מציג את מספר ה-MMSI שמתוכנת במכשיר, כלומר הזהות שלך בכל קריאת DSC.',
+ how:'MENU, ‏Set Up, ‏MMSI Check, ‏ENT.',
+ rows:[['428000501','ה-MMSI: תשע ספרות. 428 הוא קוד המדינה של ישראל.']],
+ keys:[['CLR','יוצא.']],
+ exam:'ה-MMSI מתוכנת במכשיר לפי רישיון התחנה, ואי אפשר לשנות אותו בעצמך. מכשיר בלי MMSI אינו שולח DSC.'},
+{id:'test',t:'בדיקה עצמית (Test)',k:{'internal test':5,'dsc tested found ok':5,'exit = clear':2},
+ what:'המכשיר בודק את חלק ה-DSC שלו ומדווח על התוצאה, בלי לשדר.',
+ how:'MENU, ‏Set Up, ‏Test, ‏ENT.',
+ rows:[['INTERNAL TEST','הבדיקה רצה.'],['DSC TESTED FOUND OK','הבדיקה עברה בהצלחה.']],
+ keys:[['CLR','יוצא.']],
+ exam:'את ה-DSC בודקים בבדיקה עצמית או בקריאת בדיקה, ולעולם לא בשליחת התראת מצוקה.'},
+{id:'note',t:'הודעה: הפעולה לא זמינה בסימולטור',k:{'not avalaible in the simulator':5,'not available in the simulator':5,'polling menu':3,'scan operation':3,'tri-watch':3,'add or remove id':3},
+ what:'הודעה שהפעולה שנבחרה אינה זמינה בסימולטור התרגול. במכשיר אמיתי היא קיימת.',
+ how:'מופיעה אחרי בחירה ב-Polling Request, ב-Indv ID או ב-Group ID, ואחרי לחיצה על SCAN.',
+ rows:[['POLLING MENU','Polling: בקשה אוטומטית של מיקום מתחנה אחרת.'],['ADD OR REMOVE ID','עריכת ספר הכתובות.'],['Scan Operation','סריקה: Tri-watch מאזין לערוץ 16 ולשני ערוצים נוספים. Scan mode סורק את ערוץ 16 ועד 6 ערוצים.']],
+ keys:[['CLR','סוגר את ההודעה.']],
+ exam:'במבחן המעשי לא נדרשים לפעולות האלה, אבל כדאי לדעת מה הן.'},
+{id:'dnature',t:'בחירת סוג המצוקה',k:{'select nature of distress':5,'undesignated':3,'sinking':1,'collision':2,'fire & explosion':3,'disable & adrift':3,'listing & capsizing':3,'flooding':1,'grounding':2,'piracy':2,'abandoning ship':3,'man overboard':3},
+ what:'רשימת סוגי המצוקה. הסוג שנבחר נשלח בהתראה, כדי שהמחלצים יידעו מה קרה עוד לפני שדיברת.',
+ how:'MENU, ‏Distress Setting, ‏ENT. הרשימה נמשכת על שני עמודים.',
+ rows:[['Undesignated','לא מוגדר. ברירת המחדל כשאין זמן לבחור.'],['Sinking','טביעה.'],['Collision','התנגשות.'],['Fire & Explosion','שריפה או פיצוץ.'],['Disable & Adrift','הכלי מושבת ונסחף.'],['Listing & Capsizing','נטייה מסוכנת או התהפכות.'],['Flooding','הצפה, חדירת מים.'],['Grounding','עלייה על שרטון.'],['Piracy','שוד ים או תקיפה מזוינת.'],['Abandoning ship','נטישת הכלי.'],['Man overboard','אדם נפל לים.']],
+ keys:K_MENU,
+ exam:'בוחרים את הסוג שמתאים לתיאור שבשאלה. אם אין שניות פנויות, שולחים בלי לבחור: התראה מסוג Undesignated טובה מהתראה שלא נשלחה.'},
+{id:'dpos',t:'התראת מצוקה: שעה ומיקום',k:{'gps = on':4,'gps = off':4,'lat':1,'long':1,'time':1,'enter > cnt':2},
+ what:'המכשיר מציג את השעה והמיקום שיישלחו בהתראה, ושואל אם הם באים מה-GPS או שמזינים אותם ידנית.',
+ how:'אחרי בחירת סוג המצוקה.',
+ rows:[['GPS = ON','הנתונים מגיעים מה-GPS. אם הם נכונים, מאשרים.'],['LAT 34.56N','קו רוחב.'],['LONG 032.46E','קו אורך, בשלוש ספרות למעלות.'],['TIME 1230 UTC','השעה ב-UTC.'],['GPS = OFF','אין GPS או שהנתונים שגויים: מזינים שעה ומיקום ידנית.']],
+ keys:[['▲ ▼','בוחרים בין GPS = ON ל-GPS = OFF.'],['ENT','מאשר וממשיך.'],['CLR','חוזר לרשימת סוגי המצוקה.']],
+ exam:'בפתרונות של שאלות המצוקה, עדכון השעה והמיקום בא תמיד לפני שליחת ההתראה. מיקום הוא הנתון החשוב ביותר בהתראה.'},
+{id:'edit',t:'הזנת שעה ומיקום ידנית',k:{'time utc':4,'latitude':3,'longitude':3,'set time & position':2,'manual input':1},
+ what:'מסך להזנה ידנית של שעה, קו רוחב וקו אורך.',
+ how:'MENU, ‏Set Up, ‏Set Time & Position. או במהלך הכנת התראת מצוקה, אחרי בחירה ב-GPS = OFF.',
+ rows:[['TIME UTC','השעה ב-UTC, ארבע ספרות. שעון ישראל פחות שעתיים בחורף, ופחות שלוש בקיץ.'],['LATITUDE','קו רוחב: מעלות ודקות, ואחריהן N או S.'],['LONGITUDE','קו אורך: שלוש ספרות למעלות, דקות, ואחריהן E או W.']],
+ keys:[['▲ ▼','משנים את הספרה המסומנת. בסימולטור התרגול מקלידים במקלדת המחשב.'],['ENT','עובר לספרה או לשדה הבא, ובסוף מאשר.'],['CLR','חוזר אחורה.']],
+ exam:'טעויות נפוצות: להזין שעון ישראל במקום UTC, ולהזין קו אורך בשתי ספרות במקום שלוש (034 ולא 34).'},
+{id:'dready',t:'התראת מצוקה מוכנה לשליחה',k:{'push for 5 sec':5,'distress call':2},
+ what:'ההתראה מוכנה, עם סוג המצוקה, המיקום והשעה. היא עדיין לא נשלחה.',
+ how:'אחרי אישור השעה והמיקום. המסך מופיע גם אחרי לחיצה קצרה על DISTRESS.',
+ rows:[['Distress Call','התראת מצוקה.'],['Push For 5 sec.','כדי לשלוח: מרימים את המכסה ומחזיקים את לחצן DISTRESS חמש שניות רצופות.']],
+ keys:[['DISTRESS, 5 שניות','שולח את ההתראה בערוץ 70. שחרור מוקדם מבטל.'],['CLR','יוצא בלי לשלוח.']],
+ exam:'הלחיצה הארוכה מונעת שליחה בטעות. במבחן מרימים את המכסה, מחזיקים עד סוף הספירה, ומיד אחר כך משדרים MAYDAY בקול בערוץ 16.'},
+{id:'dcount',t:'ספירה לאחור לשליחת ההתראה',k:{'keep pushing':5,'release = abort':4},
+ what:'הלחצן DISTRESS לחוץ, והמכשיר סופר חמש שניות עד השליחה.',
+ how:'בזמן שמחזיקים את לחצן DISTRESS.',
+ rows:[['KEEP PUSHING','המשך להחזיק. המספר הוא השניות שנותרו.'],['RELEASE = ABORT','שחרור עכשיו מבטל את השליחה.']],
+ keys:[['DISTRESS','ממשיכים להחזיק עד שהספירה מסתיימת.']],
+ exam:'לא משחררים לפני הסוף. התראה שלא נשלחה אינה מזעיקה אף אחד.'},
+{id:'dsent',t:'התראת המצוקה נשלחה, ממתינים לאישור',k:{'distress call transmission':4,'now waiting for ack':5,'wait ack':4,'completed':1},
+ what:'ההתראה שודרה בערוץ 70. המכשיר עבר לערוץ 16 בעוצמה גבוהה, ומחכה לאישור מתחנת חוף.',
+ how:'מיד אחרי 5 השניות על DISTRESS.',
+ rows:[['Distress Call Transmission Completed','ההתראה שודרה.'],['Now Waiting For ACK / WAIT ACK','ממתין לאישור. עד שיתקבל, המכשיר משדר את ההתראה שוב כל 4 דקות בערך.']],
+ keys:[['PTT','משדרים מיד MAYDAY בקול בערוץ 16. לא מחכים לאישור.'],['CLR','בסימולטור שלנו: CLR ואחריו ENT מבטלים התראה שנשלחה בטעות.']],
+ exam:'הסדר הוא התראת DSC, ואז קריאת מצוקה והודעת מצוקה בקול בערוץ 16. מי שמחכה לאישור לפני שהוא מדבר מאבד זמן יקר.'},
+{id:'dack',t:'התקבל אישור להתראת המצוקה',k:{'rcvd dist ack':6,'clear > exit':1},
+ what:'תחנת חוף אישרה ב-DSC שקיבלה את ההתראה שלך. השידור החוזר האוטומטי נפסק.',
+ how:'מופיע כשמגיע אישור אחרי שליחת התראת מצוקה.',
+ rows:[['RCVD DIST ACK','Received Distress Acknowledgement: האישור התקבל.'],['Clear > EXIT','CLR משתיק את הצפצוף וסוגר את ההודעה.']],
+ keys:[['CLR','משתיק וסוגר.'],['PTT','ממשיכים בקשר קולי בערוץ 16 עם תחנת החוף.']],
+ exam:'רק תחנת חוף מאשרת התראת מצוקה ב-DSC. אחרי האישור נשארים בערוץ 16 ועונים לתחנת החוף.'},
+{id:'cancelq',t:'ביטול התראת מצוקה שנשלחה בטעות',k:{'cancel distress alert':6,'stops auto-repeat':4},
+ what:'המכשיר שואל אם לבטל את ההתראה הפעילה. המסך קיים בסימולטור שלנו, ולא בסימולטור התרגול.',
+ how:'כשיש התראה פעילה: CLR במסך הראשי.',
+ rows:[['SENT ... UTC','שעת ההתראה. אותה מציינים בהודעת הביטול.'],['STOPS AUTO-REPEAT','הביטול עוצר את השידור החוזר.']],
+ keys:[['ENT','מבטל את ההתראה.'],['CLR','חוזר בלי לבטל.']],
+ exam:'אחרי הביטול במכשיר חובה להודיע בקול בערוץ 16: ALL STATIONS שלוש פעמים, זיהוי מלא, מיקום, ו-PLEASE CANCEL MY DISTRESS ALERT עם שעת ההתראה.'},
+{id:'prio',t:'בחירת עדיפות הקריאה',k:{'select priority':5,'routine':1,'safety':1,'urgency':1},
+ what:'בוחרים את דרגת העדיפות של הקריאה שעומדים לשלוח.',
+ how:'אחרי בחירה ב-All Ships CALL או ב-Individual Call.',
+ rows:[['Routine','שגרה: שיחה רגילה.'],['Safety','בטיחות: אזהרת ניווט או מזג אוויר. בקול: SECURITE.'],['Urgency','דחיפות: בעיה דחופה בלי סכנה מיידית לחיים. בקול: PAN PAN.']],
+ keys:K_MENU,
+ exam:'מצוקה (MAYDAY) אינה ברשימה, כי היא נשלחת רק בלחצן DISTRESS. השאלה במבחן היא כמעט תמיד איזו עדיפות מתאימה למצב שמתואר.'},
+{id:'allready',t:'קריאה לכל התחנות מוכנה לשליחה',k:{'all ships call ready':6,'enter >transmit':2},
+ what:'קריאת All Ships בעדיפות שנבחרה מוכנה. היא עדיין לא נשלחה.',
+ how:'MENU, ‏All Ships CALL, בחירת עדיפות, ‏ENT.',
+ rows:[['ALL SHIPS CALL READY','הקריאה מוכנה.'],['Clear > Exit · Enter > Transmit','CLR מבטל, ENT משדר.']],
+ keys:[['ENT','משדר את הקריאה בערוץ 70.'],['CLR','יוצא בלי לשדר.']],
+ exam:'הקריאה ב-DSC רק מכריזה שתבוא הודעה. את ההודעה עצמה, PAN PAN או SECURITE, משדרים אחריה בקול בערוץ 16.'},
+{id:'allsent',t:'הקריאה לכל התחנות שודרה',k:{'all ships call transmitted':6,'all ships call completed':6,'cont > enter':2},
+ what:'הקריאה שודרה בערוץ 70. קריאה לכל התחנות אינה מקבלת אישור.',
+ how:'אחרי ENT במסך ALL SHIPS CALL READY.',
+ rows:[['TRANSMITTED','הקריאה שודרה.'],['COMPLETED','השידור הסתיים, והמכשיר חוזר לערוץ 16.']],
+ keys:[['ENT / CLR','ממשיכים למסך הראשי.'],['PTT','משדרים את ההודעה בקול בערוץ 16.']],
+ exam:'אחרי השידור לא מחכים לאישור: לוחצים PTT ומשדרים את ההודעה. הודעת בטיחות מסתיימת ב-OUT, הודעת דחיפות ב-OVER.'},
+{id:'addr',t:'Individual Call: איך לבחור את התחנה',k:{'select address':4,'select adddress':4,'manual input':3},
+ what:'בוחרים איך לציין את התחנה שאליה קוראים.',
+ how:'MENU, ‏Individual Call, בחירת עדיפות.',
+ rows:[['Select Address','בחירה מספר הכתובות שבמכשיר.'],['Manual Input','הקלדת ה-MMSI ספרה אחר ספרה.']],
+ keys:K_MENU,
+ exam:'כשה-MMSI שבשאלה אינו בספר הכתובות, בוחרים Manual Input ומזינים את תשע הספרות.'},
+{id:'book',t:'ספר הכתובות',k:{'yacht':2,'haifa radio':3,'cyprus radio':3,'antalya radio':3,'marina':2,'coast stations':2,'yachts':1},
+ what:'רשימת התחנות השמורות במכשיר: MMSI ולידו שם.',
+ how:'Individual Call, ‏Select Address.',
+ rows:[['428... Yacht','כלי שיט ישראלי: ה-MMSI מתחיל ב-428.'],['004280001 Haifa Radio','תחנת חוף: ה-MMSI מתחיל בשני אפסים.'],['002091000 Cyprus Radio','תחנת החוף של קפריסין.'],['002713000 Antalya Radio','תחנת החוף של אנטליה.'],['Marina','מרינות. בסימולטור התרגול יש להן MMSI של תחנת חוף.']],
+ keys:K_MENU,
+ exam:'סוג התחנה קובע את ערוצי העבודה שיוצעו בהמשך: בין-ספינתיים ליאכטה, וערוצי תחנת חוף או נמל לתחנה יבשתית.'},
+{id:'mmsi',t:'הקלדת MMSI ידנית',k:{'mmsi input':6},
+ what:'מסך להזנת ה-MMSI של התחנה שאליה קוראים, תשע ספרות.',
+ how:'Individual Call, ‏Manual Input.',
+ rows:[['Mmsi Input','שדה ההזנה. הספרה המסומנת היא זו שמשנים.']],
+ keys:[['▲ ▼','משנים את הספרה המסומנת. בסימולטור התרגול מקלידים במקלדת המחשב.'],['ENT','עובר לספרה הבאה, ובסוף מאשר.'],['CLR','חוזר אחורה.']],
+ exam:'בודקים את תשע הספרות לפני האישור. ספרה אחת שגויה, והקריאה מגיעה לתחנה אחרת או לאף אחד.'},
+{id:'wch',t:'בחירת ערוץ עבודה לשיחה',k:{'select channel':2,'omit > clear':4,'select > enter':3,'intership safety':2,'public correspondence':2},
+ what:'בוחרים את הערוץ שבו תתנהל השיחה אחרי שהתחנה השנייה תאשר. המכשיר מציע רק ערוצים שמתאימים לסוג התחנה.',
+ how:'Individual Call, אחרי בחירת התחנה.',
+ rows:[['Intership','ערוץ בין-ספינתי, לשיחה עם יאכטה.'],['Public correspondence','ערוץ של תחנת חוף.'],['Port operation / Ship movements','ערוצי נמל.'],['Omit > Clear','בסימולטור התרגול CLR ממשיך בלי לבחור ערוץ. בסימולטור שלנו CLR חוזר אחורה.']],
+ keys:[['▲ ▼','עוברים בין הערוצים המוצעים.'],['ENT','בוחר את הערוץ.']],
+ exam:'שיחה שגרתית לא מתנהלת בערוץ 16. ב-DSC מציעים ערוץ עבודה, ואחרי האישור שני המכשירים עוברים אליו.'},
+{id:'indready',t:'קריאה אישית מוכנה לשליחה',k:{'individual call ready':6,'intership call ready':6,'intership safety call ready':6,'to transmit':3,'to exit':1},
+ what:'הקריאה מוכנה, עם ה-MMSI של היעד, העדיפות וערוץ העבודה. היא עדיין לא נשלחה.',
+ how:'Individual Call, אחרי בחירת התחנה וערוץ העבודה.',
+ rows:[['Individual Call Ready','קריאה לתחנת חוף, לנמל או למרינה.'],['Intership Call Ready','קריאה ליאכטה, בערוץ בין-ספינתי.'],['ENT : TO TRANSMIT','ENT משדר את הקריאה בערוץ 70.'],['CLR : TO EXIT','CLR מבטל.']],
+ keys:[['ENT','משדר.'],['CLR','יוצא בלי לשדר.']],
+ exam:'זה הרגע לבדוק את ה-MMSI ואת העדיפות. במבחן המעשי אומרים בקול מה שולחים ולמי, ורק אז לוחצים ENT.'},
+{id:'waitack',t:'הקריאה נשלחה, ממתינים לאישור',k:{'wait for ack':5,'individual call transmitted':4,'individual call tx':1,'clear to exit':1},
+ what:'הקריאה האישית שודרה. המכשיר מחכה שהתחנה השנייה תאשר.',
+ how:'אחרי ENT במסך Call Ready.',
+ rows:[['Individual Call Transmitted / Tx','הקריאה שודרה.'],['Wait for ACK','ממתין לאישור (Acknowledgement).'],['Clear to Exit','CLR מפסיק להמתין.']],
+ keys:[['CLR','יוצא וחוזר לערוץ 16.']],
+ exam:'בזמן ההמתנה לא משדרים בקול. אם אין אישור אחרי כמה דקות, אפשר לשלוח שוב.'},
+{id:'indack',t:'התחנה אישרה את הקריאה',k:{'rcvd ack':5,'individual call tx':2,'intership call tx':3,'intership call ack':3,'clr to stop beep':2,'now on ch':2},
+ what:'התחנה השנייה אישרה. שני המכשירים עוברים לערוץ העבודה שהוצע.',
+ how:'מופיע כשמגיע אישור לקריאה ששלחת.',
+ rows:[['Individual / Intership Call Tx','הקריאה ששלחת.'],['Rcvd Ack','Received Acknowledgement: האישור התקבל.'],['Clr To Stop Beep','CLR משתיק את הצפצוף.']],
+ keys:[['CLR','משתיק וסוגר.'],['PTT','פותחים את השיחה בקול בערוץ העבודה.'],['16','בסיום השיחה חוזרים לערוץ 16.']],
+ exam:'עכשיו מדברים בערוץ העבודה: שם התחנה הנקראת, THIS IS והשם שלך, ההודעה, OVER. לטווח קצר מספיק 1W.'},
+{id:'unable',t:'התחנה אינה יכולה לענות',k:{'received unable to comply':6,'rcvd unable':6,'dsc call transmited':3,'dsc call tx':3},
+ what:'התחנה השנייה קיבלה את הקריאה, אבל השיבה שאינה יכולה לקיים את השיחה כרגע.',
+ how:'מופיע אחרי קריאה אישית, אם הצד השני לחץ CLR במקום ENT.',
+ rows:[['Dsc Call Transmitted','הקריאה ששלחת.'],['Received Unable to comply','התקבלה תשובה: לא יכול להיענות.']],
+ keys:[['CLR','יוצא וחוזר לערוץ 16.']],
+ exam:'Unable to Comply היא תשובה תקינה. מחכים ומנסים שוב מאוחר יותר, או מציעים ערוץ אחר.'},
+{id:'group',t:'Group Call: קריאה לקבוצה',k:{'group call ready':6,'group call transmitted':6,'zimline':3,'all isr ships':3,'israely navy':3,'sailing club':3},
+ what:'קריאה לכל כלי השיט שחולקים MMSI קבוצתי אחד, למשל צי של חברה או מועדון שיט.',
+ how:'MENU, ‏Group Call.',
+ rows:[['0428...','MMSI קבוצתי: מתחיל באפס אחד, ואחריו קוד המדינה.'],['GROUP CALL READY','הקריאה מוכנה. ENT משדר.'],['GROUP CALL TRANSMITTED','הקריאה שודרה. קריאה קבוצתית אינה מקבלת אישור.']],
+ keys:[['▲ ▼','בוחרים קבוצה.'],['ENT','בוחר, ואחר כך משדר.'],['CLR','חוזר אחורה.']],
+ exam:'מזהים MMSI קבוצתי לפי האפס היחיד בתחילתו. הקריאה מצלצלת בכל המכשירים שהמספר הזה מוגדר בהם.'},
+{id:'rxdistress',t:'התקבלה התראת מצוקה מכלי אחר',k:{'rcv distress':6,'clr=beep off':3,'distress relay':4},
+ what:'המכשיר קלט ב-DSC התראת מצוקה של כלי שיט אחר, והוא מצפצף.',
+ how:'מופיע מעצמו, בכל מסך שבו אתה נמצא.',
+ rows:[['Rcv Distress Flooding','התקבלה התראת מצוקה, ולידה סוג המצוקה (כאן: הצפה).'],['0612 UTC','שעת ההתראה.'],['30.45N 32.30E','מיקום הכלי שבמצוקה.'],['428000501 Feb 7th','ה-MMSI של הכלי שבמצוקה, והתאריך.'],['Distress Relay from 00...','ההתראה הועברה הלאה על ידי תחנת חוף, ולא נשלחה ישירות מהכלי שבמצוקה.'],['Clr=Beep Off','CLR משתיק את האזעקה.']],
+ keys:[['CLR','משתיק את האזעקה. המכשיר נשאר בערוץ 16.']],
+ exam:'כלי שיט אינו מאשר התראת מצוקה ב-DSC. משתיקים, רושמים את הפרטים ביומן, ומאזינים בערוץ 16. אם תחנת חוף לא מאשרת, מאשרים בקול (RECEIVED MAYDAY) ומעבירים MAYDAY RELAY.'},
+{id:'rxall',t:'התקבלה קריאת דחיפות או בטיחות',k:{'rcv urgecy all stations':6,'rcv urgency all stations':6,'safety call':4,'all stations':1},
+ what:'התקבלה ב-DSC קריאה לכל התחנות, בעדיפות דחיפות או בטיחות. ההודעה עצמה תבוא בקול.',
+ how:'מופיע מעצמו כשתחנה אחרת שולחת All Ships CALL.',
+ rows:[['Rcv Urgency All Stations','קריאת דחיפות לכל התחנות. בקול תבוא הודעת PAN PAN.'],['Safety Call','קריאת בטיחות. בקול תבוא הודעת SECURITE.'],['2230 UTC · 27.18N 32.36E','שעת הקריאה והמיקום של התחנה הקוראת.'],['Ch16','הערוץ שבו תשודר ההודעה הקולית.'],['428000501 / 004280001','ה-MMSI של התחנה הקוראת: כלי שיט או תחנת חוף.']],
+ keys:[['CLR','משתיק את הצפצוף.']],
+ exam:'לא מאשרים קריאה לכל התחנות. מאזינים בערוץ שצוין, ובודקים אם ההודעה נוגעת לך ואם אתה יכול לסייע.'},
+{id:'rxroutine',t:'התקבלה קריאה שגרתית אליך',k:{'rcv routine call':6,'enter= ack':3,'enter to ack':3,'unable to comply':2,'stop beep':1},
+ what:'תחנה אחרת קוראת לך אישית ב-DSC ומציעה ערוץ עבודה. המכשיר מצלצל.',
+ how:'מופיע מעצמו כשמישהו שולח Individual Call ל-MMSI שלך.',
+ rows:[['Rcv Routine Call Ch06','קריאה שגרתית נכנסת, והערוץ שהקורא מציע לשיחה.'],['428000501 1200 Feb 14th','ה-MMSI של הקורא, השעה והתאריך.'],['Clr = Stop Beep','CLR ראשון משתיק את הצלצול.'],['Clr = Unable to Comply','CLR נוסף משיב שאינך יכול לענות כרגע.'],['Enter = Ack','ENT שולח אישור ומעביר את המכשיר לערוץ שהוצע.']],
+ keys:[['CLR','משתיק. לחיצה נוספת משיבה Unable to Comply.'],['ENT','מאשר ועובר לערוץ העבודה.']],
+ exam:'הסדר: CLR להשתקה, ENT לאישור, ואז עונים בקול בערוץ העבודה: שם הקורא, THIS IS והשם שלך, GO AHEAD, OVER. בסיום חוזרים לערוץ 16.'},
+{id:'tx',t:'המכשיר משדר DSC בערוץ 70',k:{'tx dsc':6},
+ what:'המכשיר משדר עכשיו קריאה דיגיטלית בערוץ 70. השידור נמשך שנייה או שתיים. המסך קיים בסימולטור שלנו.',
+ how:'מופיע לרגע אחרי כל שליחה של קריאת DSC.',
+ rows:[['TX DSC · CH70','שידור DSC. ערוץ 70 שמור לקריאות דיגיטליות בלבד.']],
+ keys:[],
+ exam:'בערוץ 70 לא מדברים. המכשיר עובר אליו לבד לשידור הקריאה, וחוזר לבד.'},
+{id:'boot',t:'הדלקה ובדיקה עצמית',k:{'self test ok':6,'dsc class d':3},
+ what:'המכשיר נדלק, בודק את עצמו ומציג את ה-MMSI שלו. המסך קיים בסימולטור שלנו.',
+ how:'מיד אחרי ההדלקה בכפתור VOL.',
+ rows:[['DSC CLASS D','סוג המכשיר: VHF עם DSC לכלי שיט קטנים.'],['MMSI','מספר הזיהוי שמתוכנת במכשיר.'],['SELF TEST OK','הבדיקה העצמית עברה.']],
+ keys:[],
+ exam:'אחרי ההדלקה בודקים שהמכשיר בערוץ 16, מכוונים עוצמת שמע ו-SQL, ומוודאים שיש מיקום ושעה.'},
+{id:'off',t:'המכשיר כבוי',k:{},
+ what:'המסך ריק, והמכשיר אינו מאזין ואינו יכול לשדר.',
+ how:'',
+ rows:[],
+ keys:[['VOL ON/OFF','מדליק את המכשיר.']],
+ exam:'בהפלגה המכשיר דולק תמיד ומאזין לערוץ 16. מכשיר כבוי אינו קולט התראות מצוקה של אחרים.'}
+];
+const SCR=Object.fromEntries(SCREENS.map(s=>[s.id,s]));
+/* which catalog entry is the simulated radio showing right now */
+function screenId(){
+  if(!R.on)return 'off';
+  const c=R.ctx||{};
+  if(R.dsctx&&R.txmsg)return 'tx';
+  switch(R.mode){
+    case 'boot':return 'boot';
+    case 'menu':return c.cur<4?'menu1':'menu2';
+    case 'note':{const tx=c.t+' '+(c.lines||[]).join(' ');return /MMSI Check/i.test(tx)?'mmsicheck':/TEST/.test(tx)?'test':'note';}
+    case 'rcvd':return 'rcvd';
+    case 'rlist':return c.which?'rlisto':'rlistd';
+    case 'setup':return 'setup';
+    case 'dnature':return 'dnature';
+    case 'dpos':return 'dpos';
+    case 'edit':return 'edit';
+    case 'dready':return 'dready';
+    case 'dcount':return 'dcount';
+    case 'prio':return 'prio';
+    case 'addr':return 'addr';
+    case 'book':return 'book';
+    case 'mmsi':return 'mmsi';
+    case 'group':return 'group';
+    case 'wch':return 'wch';
+    case 'confirm':return c.kind==='individual'?'indready':c.kind==='group'?'group':'allready';
+    case 'waitack':return 'waitack';
+    case 'cancelq':return 'cancelq';
+    case 'rx':{const k=c.call||{};return k.type==='distress'?'rxdistress':k.type==='distress-ack'?'dack':k.type==='individual'?'rxroutine':'indack';}
+  }
+  if(R.distress)return R.distress.acked?'dack':'dsent';
+  return R.mode==='ch'?'ch':'main';
+}
+/* ----- matching recognised text against the catalog ----- */
+const sqz=t=>String(t).toLowerCase().replace(/[^a-z0-9]/g,'');
+function fuzzyHas(hay,needle){
+  if(!needle)return false;
+  if(hay.includes(needle))return true;
+  const n=needle.length,tol=Math.min(2,Math.floor(n/8));
+  if(!tol)return false;
+  let prev=[];for(let i=0;i<=n;i++)prev[i]=i;
+  for(let j=0;j<hay.length;j++){
+    const cur=[0];
+    for(let i=1;i<=n;i++)cur[i]=Math.min(prev[i]+1,cur[i-1]+1,prev[i-1]+(needle[i-1]===hay[j]?0:1));
+    if(cur[n]<=tol)return true;
+    prev=cur;
+  }
+  return false;
+}
+function matchScreens(text){
+  const hay=sqz(text);
+  return SCREENS.map(s=>{
+    let score=0;const hits=[];
+    for(const p in s.k)if(fuzzyHas(hay,sqz(p))){score+=s.k[p];hits.push(p);}
+    return {s,score,hits};
+  }).filter(r=>r.score>0).sort((a,b)=>b.score-a.score);
+}
+/* ----- explanation window ----- */
+const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function screenHTML(s){
+  const tbl=rows=>'<table class="gt gl">'+rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')+'</table>';
+  return `<h3>${esc(s.t)}</h3><p class="sx-p"><b>מה רואים: </b>${esc(s.what)}</p>`
+    +(s.how?`<p class="sx-p"><b>איך מגיעים: </b>${esc(s.how)}</p>`:'')
+    +(s.rows.length?'<h4>מה כל שורה אומרת</h4>'+tbl(s.rows):'')
+    +(s.keys.length?'<h4>מה כל מקש עושה מכאן</h4>'+tbl(s.keys):'')
+    +`<p class="sx-p"><b>למה זה חשוב במבחן: </b>${esc(s.exam)}</p>`;
+}
+function showScreen(id){const s=SCR[id];$('sx-sel').value=s?id:'';$('sx-body').innerHTML=s?screenHTML(s):'';}
+function openScreenHelp(fromImage){
+  const sel=$('sx-sel');
+  if(!sel.options.length){
+    sel.innerHTML='<option value="">בחר מסך מהרשימה</option>'+SCREENS.filter(s=>s.id!=='off').map(s=>`<option value="${s.id}">${esc(s.t)}</option>`).join('');
+  }
+  $('sx-ttl').textContent=fromImage?'הסבר מסך מתמונה':'מה אני רואה במסך?';
+  $('sx-img').hidden=!fromImage;$('sx-st').textContent='';$('sx-raw').hidden=true;$('sx-cand').innerHTML='';
+  $('sx-sel-lbl').textContent=fromImage?'אפשר גם לבחור מסך מהרשימה:':'הסבר על מסך אחר:';
+  showScreen(fromImage?'':screenId());
+  $('scrx').hidden=false;
+}
+let OCRLIB=null,OCRW=null;
+function loadOCR(){
+  return OCRLIB||(OCRLIB=new Promise((res,rej)=>{
+    const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+    s.onload=()=>window.Tesseract?res(window.Tesseract):rej(new Error('ocr'));s.onerror=()=>{OCRLIB=null;rej(new Error('ocr'));};
+    document.head.appendChild(s);
+  }));
+}
+/* Finds the device screen inside a photo: the largest bright, strongly coloured, roughly rectangular area
+   (the practice simulator's screen is dark text on orange). Returns a box in image pixels, or null. */
+function findScreen(im){
+  const W=240,H=Math.max(1,Math.round(im.naturalHeight*W/im.naturalWidth)),cv=document.createElement('canvas');
+  cv.width=W;cv.height=H;const g=cv.getContext('2d');g.drawImage(im,0,0,W,H);
+  const d=g.getImageData(0,0,W,H).data,m=new Uint8Array(W*H);
+  for(let i=0;i<W*H;i++){
+    const r=d[i*4],gg=d[i*4+1],bb=d[i*4+2],mx=Math.max(r,gg,bb),mn=Math.min(r,gg,bb);
+    if(mx>140&&(mx-mn)/mx>0.4)m[i]=1;
+  }
+  let best=null;const st=[];
+  for(let p=0;p<W*H;p++){
+    if(m[p]!==1)continue;
+    let n=0,x0=W,x1=0,y0=H,y1=0;st.push(p);m[p]=2;
+    while(st.length){
+      const q=st.pop(),x=q%W,y=(q-x)/W;n++;
+      if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;
+      if(x>0&&m[q-1]===1){m[q-1]=2;st.push(q-1);}
+      if(x<W-1&&m[q+1]===1){m[q+1]=2;st.push(q+1);}
+      if(y>0&&m[q-W]===1){m[q-W]=2;st.push(q-W);}
+      if(y<H-1&&m[q+W]===1){m[q+W]=2;st.push(q+W);}
+    }
+    const bw=x1-x0+1,bh=y1-y0+1;
+    if(n>=W*H*0.012&&n/(bw*bh)>=0.5&&bw>=bh&&(!best||n>best.n))best={n,x0,y0,bw,bh};
+  }
+  if(!best)return null;
+  const k=im.naturalWidth/W;
+  return {x:Math.round(best.x0*k),y:Math.round(best.y0*k),w:Math.round(best.bw*k),h:Math.round(best.bh*k)};
+}
+function ocrCanvas(im,box,target){
+  const sc=Math.max(1,Math.min(6,target/box.w)),cv=document.createElement('canvas');
+  cv.width=Math.round(box.w*sc);cv.height=Math.round(box.h*sc);
+  const g=cv.getContext('2d');g.imageSmoothingQuality='high';g.filter='grayscale(1) contrast(1.4)';
+  g.drawImage(im,box.x,box.y,box.w,box.h,0,0,cv.width,cv.height);
+  return cv;
+}
+async function ocrImage(file,status){
+  status('טוען את רכיב זיהוי הטקסט...');
+  const T=await loadOCR();
+  const url=URL.createObjectURL(file);
+  try{
+    const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('img'));i.src=url;});
+    if(!OCRW)OCRW=await T.createWorker('eng',1,{logger:m=>{if(m.status==='recognizing text')status('מזהה טקסט: '+Math.round(m.progress*100)+'%');}});
+    status('מזהה טקסט...');
+    let text='';
+    const box=findScreen(im);
+    if(box){
+      text=((await OCRW.recognize(ocrCanvas(im,box,1700))).data.text||'').trim();
+      const m=matchScreens(text);
+      if(m[0]&&m[0].score>=4)return text;
+    }
+    const all=((await OCRW.recognize(ocrCanvas(im,{x:0,y:0,w:im.naturalWidth,h:im.naturalHeight},2400))).data.text||'').trim();
+    return (text?text+'\n':'')+all;
+  }finally{URL.revokeObjectURL(url);}
+}
+async function explainImage(file){
+  const st=t=>{$('sx-st').textContent=t;};
+  $('sx-cand').innerHTML='';$('sx-raw').hidden=true;showScreen('');
+  let text='';
+  try{text=await ocrImage(file,st);}
+  catch(e){
+    st(e&&e.message==='img'?'לא הצלחתי לפתוח את הקובץ כתמונה. נסה קובץ אחר, או בחר מסך מהרשימה.':'רכיב זיהוי הטקסט לא נטען. בדוק את החיבור לאינטרנט ונסה שוב, או בחר מסך מהרשימה.');
+    return;
+  }
+  $('sx-raw').hidden=false;$('sx-raw').open=false;$('sx-raw-tx').textContent=text.trim()||'(לא זוהה טקסט)';
+  const m=matchScreens(text),top=m[0],sure=top&&top.score>=4&&(!m[1]||top.score>=m[1].score+2);
+  if(sure){st('זוהה המסך: '+top.s.t);showScreen(top.s.id);}
+  else{
+    $('sx-raw').open=true;
+    st(m.length?'לא זיהיתי את המסך בוודאות. אלה המסכים הקרובים ביותר, בחר אחד מהם או מסך אחר מהרשימה:':'לא זיהיתי את המסך. אפשר לנסות שוב עם תמונה חדה יותר, שחתוכה כך שרואים בה רק את המסך, או לבחור את המסך מהרשימה:');
+  }
+  const others=(sure?m.slice(1,4):m.slice(0,5));
+  if(others.length){
+    const c=$('sx-cand');
+    if(sure){const l=document.createElement('span');l.textContent='לא המסך הנכון? אולי:';c.appendChild(l);}
+    others.forEach(r=>{const b=document.createElement('button');b.className='sbtn';b.textContent=r.s.t;b.onclick=()=>showScreen(r.s.id);c.appendChild(b);});
+  }
 }
 
 /* ================= voice composer ================= */
@@ -2103,6 +2523,9 @@ function drawHome(){
   dr.innerHTML='<div class="sc-top"><span class="tag t-r">תרגול מהיר</span></div><div class="sc-title">תרגולים מהירים</div><div class="sc-desc">איות פונטי, קוד NAVTEX, קריאת הודעות NAVTEX וזיהוי MMSI</div>';
   dr.onclick=openDrills;
   list.insertBefore(dr,k.nextSibling);
+  const sx=document.createElement('button');sx.className='sc';
+  sx.innerHTML='<div class="sc-top"><span class="tag t-b">עזר</span></div><div class="sc-title">הסבר מסך מתמונה</div><div class="sc-desc">העלה צילום של מסך המכשיר וקבל הסבר: מה המסך, מה כל שורה אומרת ומה כל מקש עושה</div>';
+  sx.onclick=()=>openScreenHelp(true);list.insertBefore(sx,dr.nextSibling);
   const f=document.createElement('button');f.className='sc';
   f.innerHTML='<div class="sc-top"><span class="tag t-b">FREE</span></div><div class="sc-title">מצב חופשי</div><div class="sc-desc">תפעול חופשי של המכשיר, בלי תרחיש ובלי ציון</div>';
   f.onclick=()=>startScenario(null);list.appendChild(f);
@@ -2135,6 +2558,11 @@ $('cp-cp').onclick=()=>copyText(composerText(),$('cp-ok'));
 $('cp-dl').onclick=()=>saveText(C.v.title,composerText(),$('cp-ok'));
 function cpMode(m){if(!C.open||C.written)return;C.mode=m;C.i=0;C.msg='';C.pool.forEach(c=>c.used=false);try{localStorage.setItem('vhfsim.cpmode',m);}catch(_){}drawComposer();}
 $('cp-m-pick').onclick=()=>cpMode('pick');$('cp-m-build').onclick=()=>cpMode('build');
+$('scr-btn').onclick=()=>openScreenHelp(false);
+$('sx-close').onclick=()=>{$('scrx').hidden=true;};
+$('sx-sel').onchange=e=>showScreen(e.target.value);
+$('sx-pick').onclick=()=>$('sx-file').click();
+$('sx-file').onchange=e=>{const fl=e.target.files&&e.target.files[0];e.target.value='';if(fl)explainImage(fl);};
 $('rs-m-mine').onclick=()=>drawSol(true);$('rs-m-all').onclick=()=>drawSol(false);
 $('rs-sh').onclick=()=>shareText(S.def.title,S.sol+siteFoot(),$('rs-ok'));
 $('rs-cp').onclick=()=>copyText(S.sol+siteFoot(),$('rs-ok'));
@@ -2143,7 +2571,7 @@ if(!navigator.share){$('cp-sh').hidden=true;$('rs-sh').hidden=true;}
 $('snd').onclick=()=>{muted=!muted;audio();if(master)master.gain.value=muted?0:1;$('snd').textContent='צליל: '+(muted?'כבוי':'פועל');};
 $('m-prac').onclick=()=>setMode(true);$('m-exam').onclick=()=>setMode(false);
 document.addEventListener('keydown',e=>{
-  if($('sim').hidden||C.open||explain||!$('result').hidden||!$('brief').hidden||e.target.closest('button'))return;
+  if($('sim').hidden||C.open||explain||!$('scrx').hidden||!$('result').hidden||!$('brief').hidden||e.target.closest('button'))return;
   const m={Enter:'ent',Escape:'clr',Backspace:'clr',ArrowUp:'up',ArrowDown:'dn'};
   const k=/^\d$/.test(e.key)?e.key:m[e.key];
   if(k){e.preventDefault();key(k);}
